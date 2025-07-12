@@ -1,0 +1,855 @@
+# Product Requirements Document
+# NeuroWave: Comprehensive EEG Analysis Platform
+
+## Executive Summary
+
+### Vision Statement
+To create a unified, AI-powered EEG analysis platform that democratizes access to advanced brain signal processing capabilities for clinical diagnostics, research applications, and consumer wellness monitoring.
+
+### Product Overview
+NeuroWave is a comprehensive electroencephalography (EEG) analysis platform that combines cutting-edge signal processing, machine learning algorithms, and intuitive user interfaces to serve clinical practitioners, researchers, and consumer applications. The platform addresses the growing $5.12 billion EEG devices market projected for 2035.
+
+### Key Value Propositions
+- **Clinical Excellence**: 92% seizure prediction accuracy with advanced AI algorithms
+- **Research Acceleration**: Standardized analysis pipeline reducing time-to-insight by 70%
+- **Consumer Accessibility**: Seamless integration with wearable devices and mobile platforms
+- **Data Privacy**: Industry-leading privacy-preserving techniques for sensitive brain data
+- **Interoperability**: Support for 50+ EEG device types and standardized data formats
+
+## Market Analysis
+
+### Market Size and Growth
+- **Total Addressable Market**: $5.12 billion by 2035 (CAGR: 9.85%)
+- **Wearable EEG Segment**: $695.51 million by 2031 (CAGR: 8.7%)
+- **Sleep Monitoring Market**: $2.41 billion by 2029 (CAGR: 12.7%)
+
+### Target Market Segments
+1. **Clinical Healthcare** (40% of market)
+   - Neurologists and epileptologists
+   - Sleep disorder clinics
+   - Psychiatric assessment centers
+   - Pediatric development centers
+
+2. **Research Institutions** (35% of market)
+   - University neuroscience departments
+   - Clinical research organizations
+   - Pharmaceutical companies
+   - Brain-computer interface researchers
+
+3. **Consumer Wellness** (25% of market)
+   - Individual consumers seeking brain health monitoring
+   - Fitness and wellness companies
+   - Educational institutions
+   - Performance optimization specialists
+
+### Competitive Landscape
+- **Established Players**: Emotiv (67.69% market share), NeuroSky (24.56%)
+- **Research Platforms**: EEGLAB, MNE-Python
+- **Clinical Systems**: Traditional hospital-grade EEG systems
+- **Opportunity**: Integrated platform spanning clinical, research, and consumer applications
+
+## User Requirements
+
+### Primary User Personas
+
+#### 1. Clinical Neurologist (Dr. Sarah Chen)
+- **Background**: 15 years experience, specializes in epilepsy
+- **Goals**: Accurate seizure prediction, streamlined diagnosis workflow
+- **Pain Points**: Time-consuming manual analysis, inconsistent results
+- **Requirements**: 
+  - FDA-compliant diagnostic tools
+  - Integration with hospital EHR systems
+  - Real-time monitoring capabilities
+  - Automated report generation
+
+#### 2. Research Scientist (Dr. Michael Rodriguez)
+- **Background**: PhD in computational neuroscience, studies BCI applications
+- **Goals**: Reproducible results, advanced analysis capabilities
+- **Pain Points**: Data format inconsistencies, limited collaboration tools
+- **Requirements**:
+  - Support for multiple EEG data formats
+  - Advanced machine learning algorithms
+  - Collaborative research features
+  - Open-source integration capabilities
+
+#### 3. Consumer Wellness User (Lisa Johnson)
+- **Background**: 32-year-old professional, interested in sleep optimization
+- **Goals**: Improve sleep quality, reduce stress
+- **Pain Points**: Complex technical interfaces, privacy concerns
+- **Requirements**:
+  - Intuitive mobile interface
+  - Personalized insights and recommendations
+  - Privacy-first data handling
+  - Integration with health apps
+
+### User Journey Mapping
+1. **Onboarding**: Device setup, calibration, initial assessment
+2. **Data Collection**: Continuous or session-based EEG recording
+3. **Processing**: Real-time analysis with AI-powered insights
+4. **Interpretation**: Automated reports with actionable recommendations
+5. **Follow-up**: Longitudinal tracking and trend analysis
+
+## Functional Requirements
+
+### Core Platform Features
+
+#### 1. Data Acquisition and Management
+- **Multi-device Support**: 
+  - Consumer devices (Emotiv, NeuroSky, OpenBCI)
+  - Research-grade systems (256-electrode arrays)
+  - Mobile and wearable sensors
+- **Data Standards**: BIDS formatting, OpenNeuro compatibility
+- **Storage**: Secure cloud storage with local processing options
+- **Import/Export**: Support for EDF, BDF, SET, and custom formats
+
+#### 2. Signal Processing Pipeline
+- **Preprocessing**:
+  - Automated artifact detection and removal (ICA-based)
+  - Bandpass filtering (0.5-45 Hz configurable)
+  - Epoch selection and segmentation
+  - Quality assessment scoring
+- **Feature Extraction**:
+  - Wavelet transforms (most common method identified)
+  - Time-frequency analysis
+  - Empirical mode decomposition
+  - Spectral power analysis across frequency bands
+- **Advanced Processing**:
+  - Source localization algorithms
+  - Connectivity analysis
+  - Multi-modal integration capabilities
+
+#### 3. AI/ML Analysis Engine
+- **Deep Learning Models**:
+  - Convolutional Neural Networks (92.3% accuracy benchmark)
+  - Recurrent Neural Networks for temporal analysis
+  - Transformer architectures for attention-based analysis
+- **Traditional ML**:
+  - Support Vector Machines (36% competitive accuracy)
+  - Random Forest classifiers
+  - Ensemble methods
+- **Specialized Applications**:
+  - Seizure prediction (92% sensitivity target)
+  - Sleep disorder detection
+  - ADHD diagnosis (90.81% accuracy benchmark)
+  - Autism spectrum disorder screening (95% specificity)
+
+#### 4. Clinical Applications
+- **Epilepsy Management**:
+  - Automated seizure detection
+  - Preictal state prediction (20-minute lead time)
+  - Interictal spike analysis
+  - Medication response monitoring
+- **Sleep Disorders**:
+  - Automated sleep staging
+  - Sleep depth indices
+  - Inter-hemispheric coherence analysis
+  - Arousal and recovery dynamics
+- **Psychiatric Assessment**:
+  - ADHD diagnostic markers
+  - Autism screening protocols
+  - Depression and anxiety indicators
+  - Cognitive load assessment
+
+#### 5. Research Tools
+- **Data Visualization**:
+  - Real-time signal monitoring
+  - Topographic mapping
+  - Time-frequency representations
+  - Statistical analysis plots
+- **Collaboration Features**:
+  - Multi-user project management
+  - Version control for analysis pipelines
+  - Peer review and annotation systems
+  - Data sharing with privacy controls
+- **Custom Analysis**:
+  - Scriptable processing pipelines
+  - Plugin architecture for custom algorithms
+  - Integration with R, Python, and MATLAB
+
+#### 6. Consumer Features
+- **Mobile Applications**:
+  - iOS and Android native apps
+  - Real-time EEG monitoring
+  - Personalized insights dashboard
+  - Gamification elements for engagement
+- **Wellness Tracking**:
+  - Sleep quality scoring
+  - Stress level monitoring
+  - Focus and attention metrics
+  - Meditation and mindfulness guidance
+- **Integration**:
+  - Apple Health and Google Fit
+  - Wearable device ecosystems
+  - Third-party wellness apps
+
+### Virtual Reality Integration
+- **VR-EEG Systems**:
+  - Modified VR headsets with integrated EEG sensors
+  - Soft, conductive electrodes for comfort
+  - Real-time EEG-VR interaction capabilities
+- **Applications**:
+  - Anxiety treatment protocols
+  - Stress assessment in immersive environments
+  - Human-robot interaction studies
+  - Avatar control systems
+  - Gaming and entertainment applications
+
+### Brain-Computer Interface (BCI)
+- **Real-time Processing**:
+  - Smartphone-based BCI implementations
+  - Auditory selective attention paradigms
+  - Motor imagery classification
+- **Wireless Systems**:
+  - Bluetooth connectivity
+  - Earbud-like form factors
+  - Tattoo-like electrode interfaces
+- **Applications**:
+  - Assistive technology for disabled users
+  - Human augmentation systems
+  - Neurofeedback training protocols
+  - Performance enhancement applications
+
+## Technical Requirements
+
+### System Architecture
+- **Cloud-Native Design**: Microservices architecture on AWS/Azure/GCP
+- **Edge Computing**: Local processing capabilities for real-time analysis
+- **API-First**: RESTful APIs for third-party integrations
+- **Containerization**: Docker/Kubernetes for scalability
+- **Database**: Time-series database for EEG data, PostgreSQL for metadata
+
+### Performance Requirements
+- **Real-time Processing**: <100ms latency for live analysis
+- **Scalability**: Support for 100,000+ concurrent users
+- **Data Throughput**: 1000+ samples per second per channel
+- **Storage**: Petabyte-scale data storage with intelligent archiving
+- **Availability**: 99.9% uptime for clinical applications
+
+### Security and Privacy
+- **Data Encryption**: AES-256 encryption at rest and in transit
+- **Privacy-Preserving Techniques**: 
+  - Differential privacy for research data sharing
+  - Federated learning for model training
+  - Homomorphic encryption for sensitive computations
+- **Compliance**: HIPAA, GDPR, FDA 21 CFR Part 11
+- **Authentication**: Multi-factor authentication, OAuth 2.0
+- **Audit Logging**: Comprehensive activity tracking
+
+### Integration Requirements
+- **Device Compatibility**:
+  - Hardware abstraction layer for diverse EEG devices
+  - Standardized device drivers and APIs
+  - Automatic device detection and configuration
+- **Data Formats**:
+  - Native support for EDF, BDF, SET, FIF formats
+  - BIDS standard compliance
+  - Custom format adapters
+- **Third-party Systems**:
+  - Hospital EHR systems (Epic, Cerner)
+  - Research databases (OpenNeuro, NEMAR)
+  - Consumer health platforms
+
+### Quality Assurance
+- **Validation Studies**:
+  - Multi-site clinical trials
+  - Comparison with gold-standard methods
+  - Reproducibility across different populations
+- **Testing Framework**:
+  - Unit testing for all algorithms
+  - Integration testing with real EEG data
+  - Performance benchmarking
+  - User acceptance testing
+
+## Non-Functional Requirements
+
+### Usability
+- **User Interface**: Intuitive design following healthcare UX principles
+- **Accessibility**: WCAG 2.1 AA compliance
+- **Training**: Comprehensive onboarding and training programs
+- **Support**: 24/7 technical support for clinical users
+
+### Reliability
+- **Fault Tolerance**: Graceful degradation during system failures
+- **Data Integrity**: Checksums and validation for all data operations
+- **Backup and Recovery**: Automated backups with 4-hour RTO
+- **Monitoring**: Real-time system health monitoring
+
+### Performance
+- **Response Time**: <2 seconds for standard analysis operations
+- **Throughput**: 10,000+ concurrent analysis sessions
+- **Resource Usage**: Efficient memory and CPU utilization
+- **Scalability**: Auto-scaling based on demand
+
+### Compliance and Standards
+- **Medical Device Regulations**: FDA Class II medical device pathway
+- **International Standards**: ISO 13485, ISO 14971, IEC 62304
+- **Data Privacy**: HIPAA, GDPR, state privacy laws
+- **Quality Management**: ISO 9001 certified processes
+
+## Success Metrics
+
+### Clinical Metrics
+- **Diagnostic Accuracy**: 92% seizure prediction accuracy
+- **Time to Diagnosis**: 50% reduction in analysis time
+- **Clinical Adoption**: 1000+ healthcare facilities within 24 months
+- **Patient Outcomes**: 30% improvement in seizure management
+
+### Research Metrics
+- **Publication Impact**: 100+ peer-reviewed papers using the platform
+- **Data Sharing**: 10,000+ datasets made available for research
+- **Collaboration**: 500+ multi-site research projects
+- **Algorithm Performance**: Top 3 rankings in EEG analysis competitions
+
+### Consumer Metrics
+- **User Adoption**: 1M+ active users within 18 months
+- **Engagement**: 70% monthly active user retention
+- **Satisfaction**: 4.5+ star app store ratings
+- **Health Outcomes**: 25% improvement in sleep quality metrics
+
+### Business Metrics
+- **Revenue**: $50M ARR by year 3
+- **Market Share**: 15% of addressable market
+- **Customer Acquisition**: <$200 CAC for consumer segment
+- **Profitability**: Break-even by month 30
+
+## Development Timeline
+
+### Phase 1: Foundation (Months 1-12)
+- **MVP Development**: Core signal processing pipeline
+- **Initial AI Models**: Basic seizure detection and sleep analysis
+- **Clinical Pilot**: 5 healthcare partners for validation
+- **Regulatory Preparation**: FDA pre-submission meetings
+
+### Phase 2: Clinical Focus (Months 13-24)
+- **Clinical Platform**: Full clinical feature set
+- **FDA Submission**: 510(k) clearance application
+- **Clinical Validation**: Multi-site studies
+- **Market Launch**: Clinical product release
+
+### Phase 3: Research Expansion (Months 25-36)
+- **Research Tools**: Advanced analysis capabilities
+- **Collaboration Platform**: Multi-user research features
+- **Open Source**: Community-driven development
+- **Academic Partnerships**: University research programs
+
+### Phase 4: Consumer Scale (Months 37-48)
+- **Consumer Platform**: Mobile apps and wearable integration
+- **AI Enhancement**: Personalized insights and recommendations
+- **Global Expansion**: International market entry
+- **Platform Ecosystem**: Third-party developer program
+
+## Risk Analysis
+
+### Technical Risks
+- **Algorithm Performance**: Mitigation through extensive validation
+- **Data Quality**: Standardized collection protocols and quality checks
+- **Scalability**: Cloud-native architecture and performance testing
+- **Security**: Multi-layered security approach and regular audits
+
+### Market Risks
+- **Competition**: Differentiation through superior AI capabilities
+- **Adoption**: Extensive user research and iterative design
+- **Regulatory**: Early engagement with FDA and regulatory experts
+- **Funding**: Diversified funding sources and milestone-based approach
+
+### Operational Risks
+- **Talent Acquisition**: Competitive compensation and equity packages
+- **Quality Assurance**: Comprehensive testing and validation processes
+- **Customer Support**: Scalable support infrastructure
+- **Data Privacy**: Privacy-by-design approach and compliance expertise
+
+## Conclusion
+
+NeuroWave represents a transformative opportunity to revolutionize EEG analysis across clinical, research, and consumer applications. By leveraging cutting-edge AI/ML technologies, addressing key market challenges, and maintaining a focus on user needs, the platform can capture significant market share while advancing the field of neuroscience.
+
+The comprehensive approach outlined in this PRD addresses the full spectrum of EEG applications, from clinical diagnosis to consumer wellness, positioning NeuroWave as the definitive platform for brain signal analysis. With proper execution, validation, and market positioning, NeuroWave can achieve the ambitious goals outlined while contributing to better healthcare outcomes and advancing neuroscience research.
+
+Success depends on maintaining focus on user needs, ensuring regulatory compliance, and building a sustainable business model that serves all stakeholders in the EEG ecosystem. The extensive research foundation provides a strong basis for informed product decisions and technical implementation strategies.
+
+---
+
+# Product Requirements Document
+# NeuroClassify: CNN-LSTM Brain Disorder Classification Platform
+
+## Executive Summary
+
+### Vision Statement
+To develop an AI-powered brain disorder classification platform using state-of-the-art CNN-LSTM neural networks that provides accurate, real-time diagnosis of neurological and psychiatric conditions from EEG signals, accessible through modern web and mobile interfaces.
+
+### Product Overview
+NeuroClassify is a specialized deep learning platform that combines Convolutional Neural Networks (CNN) and Long Short-Term Memory (LSTM) networks to classify brain disorders from EEG signals. The platform features an Astro-based frontend for high-performance user interaction and a high-performance Go backend for ML model serving and data processing.
+
+### Key Value Propositions
+- **Clinical Accuracy**: 99.7% accuracy in Parkinson's disease classification, 99.39% in epileptic seizure detection
+- **Multi-Disorder Support**: Epilepsy, Parkinson's, Autism Spectrum Disorder, Psychiatric conditions
+- **Real-time Processing**: <200ms inference time for disorder classification
+- **Modern Architecture**: High-performance Astro frontend with Go backend for optimal loading speeds
+- **Research Integration**: Support for standard datasets (Bonn, CHB-MIT, UCI) and custom research data
+
+## Market Analysis
+
+### Target Market
+- **Primary**: Clinical neurologists, psychiatrists, and diagnostic centers
+- **Secondary**: Research institutions and academic medical centers
+- **Tertiary**: Telemedicine platforms and remote monitoring services
+
+### Market Opportunity
+- Global neurological disorder diagnostics market: $6.8 billion by 2027
+- EEG-based diagnosis segment growing at 12.3% CAGR
+- Increasing demand for automated, AI-powered diagnostic tools
+- Growing adoption of telemedicine requiring remote diagnostic capabilities
+
+### Competitive Advantages
+- State-of-the-art CNN-LSTM architecture with proven research results
+- Ultra-fast web technology stack (Next.js + Go) for superior performance and minimal loading times
+- Real-time processing capabilities for immediate diagnosis
+- Support for multiple disorder types in a single platform
+- Integration with standard research datasets and protocols
+
+## User Requirements
+
+### Primary Users
+
+#### 1. Clinical Neurologist (Dr. Amanda Rodriguez)
+- **Background**: 12 years experience, specializes in movement disorders
+- **Goals**: Quick, accurate diagnosis support for complex cases
+- **Pain Points**: Time-consuming EEG analysis, need for second opinions
+- **Requirements**:
+  - Upload EEG files (EDF, CSV formats)
+  - Real-time classification results with confidence scores
+  - Detailed analysis reports for patient records
+  - Integration with existing clinical workflows
+
+#### 2. Research Scientist (Dr. James Kim)
+- **Background**: PhD in computational neuroscience, studies neurological biomarkers
+- **Goals**: Validate models on research datasets, publish findings
+- **Pain Points**: Need for reproducible, standardized analysis tools
+- **Requirements**:
+  - Batch processing capabilities for large datasets
+  - Model performance metrics and visualization
+  - Export capabilities for research analysis
+  - API access for integration with research pipelines
+
+#### 3. EEG Technologist (Maria Santos)
+- **Background**: Certified EEG technologist in hospital setting
+- **Goals**: Efficient EEG screening and preliminary analysis
+- **Pain Points**: High volume of EEG recordings to process
+- **Requirements**:
+  - Intuitive interface for rapid file upload
+  - Quick screening results with abnormality detection
+  - Queue management for multiple patients
+  - Print-friendly reports for physicians
+
+### User Journey
+
+#### Primary Workflow
+1. **Authentication**: Secure login with role-based access
+2. **File Upload**: Drag-and-drop EEG file upload with format validation
+3. **Preprocessing**: Automatic signal preprocessing and quality check
+4. **Classification**: CNN-LSTM model inference with progress tracking
+5. **Results**: Comprehensive results display with confidence scores
+6. **Reporting**: Generate and export detailed diagnostic reports
+7. **Storage**: Secure storage of analysis results and patient data
+
+## Functional Requirements
+
+### Core Features
+
+#### 1. EEG Data Management
+- **File Upload System**:
+  - Support for EDF, EDF+, CSV, and text formats
+  - Drag-and-drop interface with progress indicators
+  - Batch upload capabilities for multiple files
+  - File size limits: Up to 500MB per file
+  - Automatic format detection and validation
+
+- **Data Preprocessing**:
+  - Bandpass filtering (0.5-40 Hz configurable)
+  - Artifact removal using automated algorithms
+  - Signal normalization and standardization
+  - Epoch segmentation (configurable window sizes)
+  - Quality assessment scoring
+
+#### 2. CNN-LSTM Classification Engine
+- **Model Architecture**:
+  - 1D Convolutional layers for spatial feature extraction
+  - Max pooling and dropout layers for regularization
+  - Bidirectional LSTM layers for temporal pattern recognition
+  - Dense layers for final classification
+  - Softmax activation for multi-class probability output
+
+- **Supported Disorders**:
+  - **Epilepsy**: Seizure vs. non-seizure classification (99.39% accuracy target)
+  - **Parkinson's Disease**: PD vs. healthy control (99.7% accuracy target)
+  - **Autism Spectrum Disorder**: ASD detection (75% accuracy target)
+  - **Psychiatric Disorders**: Stress, anxiety, adjustment disorders (98% accuracy target)
+
+- **Model Performance**:
+  - Real-time inference: <200ms per classification
+  - Batch processing: 100+ files per hour
+  - Confidence scoring: Probability distributions for each class
+  - Uncertainty quantification for clinical decision support
+
+#### 3. Results and Reporting
+- **Classification Results**:
+  - Primary diagnosis with confidence percentage
+  - Probability scores for all disorder classes
+  - Visual representation of decision confidence
+  - Temporal analysis showing classification over time segments
+
+- **Detailed Reports**:
+  - PDF generation with clinical formatting
+  - Include patient demographics and recording details
+  - Model predictions with confidence intervals
+  - Recommended follow-up actions based on results
+  - Integration with hospital report templates
+
+#### 4. Data Visualization
+- **EEG Signal Display**:
+  - Multi-channel EEG waveform visualization
+  - Configurable time scales and amplitude settings
+  - Overlay of detected artifacts and abnormalities
+  - Spectral analysis plots (power spectral density)
+
+- **Model Insights**:
+  - Feature importance visualization
+  - Attention maps showing critical time segments
+  - Model activation visualizations
+  - Performance metrics dashboards
+
+### Backend Requirements (Go)
+
+#### 1. API Server Architecture
+- **Microservices Design**:
+  - Authentication service for user management
+  - File processing service for EEG data handling
+  - ML inference service for model predictions
+  - Reporting service for PDF generation
+  - Notification service for real-time updates
+
+- **Framework and Libraries**:
+  - Gin or Echo framework for HTTP server
+  - GORM for database ORM
+  - JWT for authentication tokens
+  - WebSocket support for real-time communication
+  - Structured logging with Logrus or Zap
+
+#### 2. Machine Learning Pipeline
+- **Model Serving**:
+  - TensorFlow Serving or ONNX Runtime for model inference
+  - Model versioning and A/B testing capabilities
+  - Batch processing queues for multiple file analysis
+  - GPU acceleration support for faster inference
+  - Model monitoring and performance tracking
+
+- **Data Processing**:
+  - Concurrent processing using Go goroutines
+  - Streaming processing for large EEG files
+  - Memory-efficient data structures
+  - Caching frequently accessed data
+  - Background job processing with Redis
+
+#### 3. Database and Storage
+- **Database Design**:
+  - PostgreSQL for relational data (users, analyses, reports)
+  - MongoDB for document storage (raw EEG data, results)
+  - Redis for caching and session management
+  - Time-series database (InfluxDB) for EEG signal storage
+
+- **File Storage**:
+  - Local file system for temporary processing
+  - Cloud storage (AWS S3, Google Cloud) for long-term storage
+  - CDN integration for fast file delivery
+  - Automated backup and archiving
+
+#### 4. Security and Compliance
+- **Data Protection**:
+  - AES-256 encryption for data at rest
+  - TLS 1.3 for data in transit
+  - Field-level encryption for sensitive data
+  - Secure file upload with virus scanning
+
+- **Compliance**:
+  - HIPAA compliance for healthcare data
+  - GDPR compliance for European users
+  - Audit logging for all data access
+  - Role-based access control (RBAC)
+
+## Technical Architecture
+
+### System Architecture Overview
+```
+Frontend (Next.js)
+├── Static Site Generation (SSG)
+├── Server-Side Rendering (SSR)
+├── API Routes
+├── Client-side Data Fetching
+└── Real-time Communication (WebSocket)
+```
+
+### CNN-LSTM Model Architecture
+
+#### 1. Input Layer
+- **Input Shape**: (batch_size, sequence_length, n_channels)
+- **Sequence Length**: 1000-4000 samples (4-16 seconds at 250 Hz)
+- **Channels**: 1-64 EEG electrodes depending on dataset
+- **Preprocessing**: Normalization, filtering applied
+
+#### 2. CNN Feature Extraction
+- **Conv1D Layers**: 3-5 convolutional layers
+  - Filters: 32, 64, 128, 256
+  - Kernel sizes: 3, 5, 7 for multi-scale feature extraction
+  - Activation: ReLU
+  - Batch normalization after each layer
+- **Pooling**: Max pooling with stride 2
+- **Dropout**: 0.3-0.5 after pooling layers
+
+#### 3. LSTM Temporal Modeling
+- **Bidirectional LSTM**: 2-3 layers
+  - Hidden units: 128, 256, 512
+  - Return sequences for multi-layer stacking
+  - Dropout: 0.3-0.5 between layers
+- **Attention Mechanism**: Optional attention layer for feature weighting
+
+#### 4. Classification Head
+- **Dense Layers**: 1-2 fully connected layers
+  - Units: 256, 128
+  - Activation: ReLU
+  - Dropout: 0.5
+- **Output Layer**: 
+  - Units: Number of disorder classes
+  - Activation: Softmax for multi-class, Sigmoid for binary
+
+#### 5. Model Training Configuration
+- **Optimizer**: Adam (learning rate: 0.001)
+- **Loss Function**: Categorical crossentropy
+- **Metrics**: Accuracy, Precision, Recall, F1-score
+- **Batch Size**: 32-128
+- **Epochs**: 50-100 with early stopping
+- **Validation Split**: 20% of training data
+
+### Performance Requirements
+
+#### 1. Response Time
+- **File Upload**: <30 seconds for 100MB files
+- **Preprocessing**: <60 seconds for 30-minute EEG recording
+- **Model Inference**: <200ms per classification
+- **Report Generation**: <10 seconds for standard report
+- **Dashboard Loading**: <1 second initial load (optimized with Next.js's hybrid rendering)
+
+#### 2. Throughput
+- **Concurrent Users**: 100+ simultaneous users
+- **File Processing**: 500+ files per hour
+- **API Requests**: 1000+ requests per minute
+- **Database Queries**: <100ms average response time
+
+#### 3. Scalability
+- **Horizontal Scaling**: Kubernetes deployment with auto-scaling
+- **Load Balancing**: Nginx or cloud load balancer
+- **Database Scaling**: Read replicas and connection pooling
+- **Caching**: Redis cluster for distributed caching
+
+## Data Requirements
+
+### Input Data Formats
+- **Supported Formats**: EDF, EDF+, CSV, TXT
+- **Sampling Rates**: 125-1000 Hz (optimal: 250-500 Hz)
+- **Channel Count**: 1-64 channels
+- **Recording Duration**: 30 seconds to 24 hours
+- **File Size Limits**: 500MB per file
+
+### Training Datasets
+- **Bonn EEG Dataset**: 5 sets (A-E) for epilepsy classification
+- **CHB-MIT Database**: Pediatric seizure recordings
+- **UCI Epileptic Seizure Dataset**: Multi-class seizure data
+- **Custom Parkinson's Dataset**: Movement disorder recordings
+- **Psychiatric EEG Dataset**: Stress and anxiety recordings
+
+### Data Validation
+- **Format Verification**: Automatic format detection and validation
+- **Quality Checks**: Signal quality assessment and artifact detection
+- **Metadata Extraction**: Patient demographics, recording parameters
+- **Anonymization**: Automatic removal of patient identifiers
+
+## Development Timeline
+
+### Phase 1: Core Platform (Months 1-4)
+#### Month 1: Foundation
+- **Week 1-2**: Project setup and architecture design
+  - Astro frontend setup with TypeScript and component frameworks
+  - Go backend setup with Gin framework
+  - Database schema design and setup
+  - CI/CD pipeline configuration
+
+- **Week 3-4**: Basic file upload and storage
+  - Frontend file upload component
+  - Backend file handling and validation
+  - Cloud storage integration
+  - Basic authentication system
+
+#### Month 2: Data Processing
+- **Week 1-2**: EEG preprocessing pipeline
+  - Signal filtering and normalization
+  - Artifact detection algorithms
+  - Quality assessment scoring
+  - Batch processing capabilities
+
+- **Week 3-4**: Database integration
+  - User management system
+  - File metadata storage
+  - Analysis history tracking
+  - Basic API endpoints
+
+#### Month 3: Model Integration
+- **Week 1-2**: CNN-LSTM model implementation
+  - TensorFlow model development
+  - Model training on Bonn dataset
+  - Model validation and testing
+  - Performance optimization
+
+- **Week 3-4**: Model serving infrastructure
+  - Go-based inference service
+  - Model versioning system
+  - Real-time prediction API
+  - Performance monitoring
+
+#### Month 4: Frontend Development
+- **Week 1-2**: Core UI components
+  - Dashboard interface
+  - File upload interface
+  - Analysis progress tracking
+  - Results visualization
+
+- **Week 3-4**: Integration and testing
+  - Frontend-backend integration
+  - End-to-end testing
+  - Performance optimization
+  - Bug fixes and refinements
+
+### Phase 2: Feature Enhancement (Months 5-8)
+#### Months 5-6: Multi-Disorder Support
+- Parkinson's disease classification model
+- Autism spectrum disorder detection
+- Psychiatric disorder classification
+- Model ensemble and voting mechanisms
+
+#### Months 7-8: Advanced Features
+- Real-time streaming analysis
+- Batch processing interface
+- Advanced visualization tools
+- Report generation system
+
+### Phase 3: Clinical Validation (Months 9-12)
+#### Months 9-10: Clinical Testing
+- Integration with clinical workflows
+- User acceptance testing
+- Performance validation studies
+- Regulatory compliance review
+
+#### Months 11-12: Production Deployment
+- Production infrastructure setup
+- Security audit and penetration testing
+- Clinical pilot program
+- User training and documentation
+
+### Phase 4: Scale and Optimization (Months 13-16)
+#### Months 13-14: Performance Optimization
+- Model optimization and acceleration
+- Infrastructure scaling
+- Advanced caching strategies
+- Mobile-responsive improvements
+
+#### Months 15-16: Advanced Analytics
+- Model interpretability features
+- Advanced reporting capabilities
+- Integration with clinical systems
+- Research collaboration tools
+
+## Success Metrics
+
+### Technical Performance
+- **Model Accuracy**: 
+  - Epilepsy detection: >99% accuracy
+  - Parkinson's disease: >99% accuracy
+  - ASD detection: >75% accuracy
+  - Psychiatric disorders: >95% accuracy
+
+- **System Performance**:
+  - API response time: <200ms (95th percentile)
+  - File processing time: <2 minutes for 1-hour recording
+  - System uptime: >99.5%
+  - Concurrent user capacity: 100+ users
+
+### User Adoption
+- **Clinical Adoption**: 50+ healthcare facilities within 12 months
+- **User Engagement**: 80% user retention after 3 months
+- **Processing Volume**: 10,000+ EEG analyses per month
+- **User Satisfaction**: >4.5/5 rating in user surveys
+
+### Business Metrics
+- **Revenue**: $2M ARR by month 18
+- **Customer Acquisition**: <$5000 cost per clinical customer
+- **Market Penetration**: 5% of target market within 24 months
+- **Profitability**: Break-even by month 20
+
+## Risk Analysis and Mitigation
+
+### Technical Risks
+1. **Model Performance Risk**
+   - **Risk**: Models may not achieve target accuracy in real-world data
+   - **Mitigation**: Extensive validation on diverse datasets, continuous model improvement
+
+2. **Scalability Risk**
+   - **Risk**: System may not handle expected user load
+   - **Mitigation**: Load testing, auto-scaling infrastructure, performance monitoring
+
+3. **Data Quality Risk**
+   - **Risk**: Poor quality EEG data may affect model performance
+   - **Mitigation**: Robust preprocessing pipeline, quality assessment tools
+
+### Regulatory Risks
+1. **FDA Approval Risk**
+   - **Risk**: Regulatory approval may be required for clinical use
+   - **Mitigation**: Early FDA consultation, clinical validation studies
+
+2. **Data Privacy Risk**
+   - **Risk**: HIPAA compliance challenges with patient data
+   - **Mitigation**: Privacy-by-design architecture, security audits
+
+### Market Risks
+1. **Competition Risk**
+   - **Risk**: Established players may launch similar products
+   - **Mitigation**: Faster time-to-market, superior technology, strong partnerships
+
+2. **Adoption Risk**
+   - **Risk**: Slow clinical adoption of AI diagnostic tools
+   - **Mitigation**: Clinical validation studies, physician education, pilot programs
+
+## Quality Assurance
+
+### Testing Strategy
+- **Unit Testing**: 90%+ code coverage for backend services
+- **Integration Testing**: End-to-end API testing
+- **Performance Testing**: Load testing with simulated users
+- **Security Testing**: Penetration testing and vulnerability assessment
+- **User Acceptance Testing**: Clinical user testing and feedback
+
+### Model Validation
+- **Cross-validation**: K-fold cross-validation on training data
+- **External Validation**: Testing on independent datasets
+- **Clinical Validation**: Comparison with expert neurologist diagnosis
+- **Bias Testing**: Evaluation across different demographics and populations
+
+### Continuous Monitoring
+- **System Monitoring**: Real-time performance and error tracking
+- **Model Monitoring**: Model drift detection and performance tracking
+- **User Monitoring**: User behavior analytics and satisfaction tracking
+- **Security Monitoring**: Intrusion detection and audit logging
+
+## Conclusion
+
+NeuroClassify represents a cutting-edge application of CNN-LSTM neural networks for brain disorder classification, built on a modern technology stack of Astro and Go. The platform addresses critical needs in clinical neurology by providing accurate, real-time diagnosis support while maintaining the highest standards of performance, security, and user experience.
+
+The comprehensive development plan outlined in this PRD leverages proven research results and modern software engineering practices to deliver a scalable, reliable, and clinically valuable diagnostic tool. With proper execution, NeuroClassify can significantly impact the field of neurological diagnosis and improve patient outcomes through AI-powered medical insights.
+
+Success depends on maintaining focus on clinical accuracy, user experience, and regulatory compliance while building a sustainable and scalable technology platform that serves the evolving needs of healthcare providers and patients.

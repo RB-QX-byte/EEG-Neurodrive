@@ -1,0 +1,93 @@
+{
+	"meta": {
+		"generatedAt": "2025-07-07T10:25:29.187Z",
+		"tasksAnalyzed": 10,
+		"totalTasks": 10,
+		"analysisCount": 10,
+		"thresholdScore": 5,
+		"projectName": "Taskmaster",
+		"usedResearch": false
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 11,
+			"taskTitle": "Project Setup and Core Infrastructure Configuration",
+			"complexityScore": 9,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down the 'Project Setup and Core Infrastructure Configuration' task into detailed subtasks covering Astro frontend setup, Go backend setup, database provisioning and configuration (PostgreSQL, MongoDB, Redis), cloud storage integration, and CI/CD pipeline setup.",
+			"reasoning": "This is a foundational task involving multiple distinct technologies and integrations (frontend, backend, 3 databases, cloud storage, CI/CD). Each component requires specific setup and configuration, making it highly complex and critical for the project's success."
+		},
+		{
+			"taskId": 12,
+			"taskTitle": "Implement User Authentication and RBAC",
+			"complexityScore": 8,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down the 'Implement User Authentication and RBAC' task into detailed subtasks covering user registration endpoint, user login endpoint, JWT token generation and validation, RBAC logic implementation, and database integration for user data.",
+			"reasoning": "Implementing secure authentication and authorization is complex due to security considerations, token management (JWT), and the logic required for role-based access control. It involves backend development and database interaction."
+		},
+		{
+			"taskId": 13,
+			"taskTitle": "Develop EEG File Upload and Secure Storage",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down the 'Develop EEG File Upload and Secure Storage' task into detailed subtasks covering frontend file upload UI (drag-and-drop, progress), backend upload API endpoint, file validation (format, size), temporary file handling, cloud storage upload logic, and associating files with users.",
+			"reasoning": "This task spans frontend and backend, requiring UI development, API implementation, file handling (including large files), validation, and integration with cloud storage. Secure handling adds complexity."
+		},
+		{
+			"taskId": 14,
+			"taskTitle": "Implement EEG Data Preprocessing Pipeline",
+			"complexityScore": 9,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down the 'Implement EEG Data Preprocessing Pipeline' task into detailed subtasks covering bandpass filtering implementation, automated artifact removal logic, signal normalization/standardization, epoch segmentation, pipeline integration, and quality assessment scoring.",
+			"reasoning": "This task involves implementing domain-specific signal processing algorithms. Each preprocessing step is a distinct, potentially complex piece of logic that needs careful implementation, integration, and validation."
+		},
+		{
+			"taskId": 15,
+			"taskTitle": "Set up ML Model Serving Infrastructure",
+			"complexityScore": 7,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down the 'Set up ML Model Serving Infrastructure' task into detailed subtasks covering selecting and installing ML serving software (TensorFlow Serving/ONNX Runtime), configuring the serving environment (including GPU), developing the Go client service, and implementing model loading and request handling.",
+			"reasoning": "Setting up and integrating with external ML serving software adds complexity. It requires configuration, network communication setup, and developing a client interface in Go."
+		},
+		{
+			"taskId": 16,
+			"taskTitle": "Implement CNN-LSTM Classification Logic",
+			"complexityScore": 8,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down the 'Implement CNN-LSTM Classification Logic' task into detailed subtasks covering integrating with the ML serving client, preparing preprocessed data for inference, processing model output (diagnosis, scores, probabilities), and performance testing and optimization.",
+			"reasoning": "This is the core ML inference logic, requiring precise data handling, integration with the serving layer, processing complex model outputs, and meeting performance requirements (<200ms)."
+		},
+		{
+			"taskId": 17,
+			"taskTitle": "Develop Analysis Results Processing and Storage",
+			"complexityScore": 7,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down the 'Develop Analysis Results Processing and Storage' task into detailed subtasks covering PostgreSQL schema design for analysis metadata, MongoDB schema design for detailed results, implementing Go functions to store metadata in PostgreSQL, and implementing Go functions to store detailed results in MongoDB.",
+			"reasoning": "Storing results across two different database types (relational and document) requires distinct schema designs and implementation logic for each, adding complexity compared to a single database."
+		},
+		{
+			"taskId": 18,
+			"taskTitle": "Build Core Frontend User Interface (Dashboard, Upload, Progress)",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down the 'Build Core Frontend User Interface' task into detailed subtasks covering the main dashboard page, the file upload interactive component, the analysis list and progress tracking component, implementing navigation and layout, and integrating with backend APIs (auth, upload, status).",
+			"reasoning": "This task involves building multiple interactive frontend components and pages, integrating with several backend APIs, and ensuring a good user experience and responsiveness, which requires careful component design and state management."
+		},
+		{
+			"taskId": 19,
+			"taskTitle": "Implement Frontend Results Visualization",
+			"complexityScore": 6,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down the 'Implement Frontend Results Visualization' task into detailed subtasks covering fetching analysis results, displaying classification summary (diagnosis, scores), implementing spectral analysis visualization, implementing temporal results visualization, and integrating necessary charting libraries.",
+			"reasoning": "This task involves fetching data and using charting libraries to display it. While not as complex as core logic or infrastructure, implementing various visualizations and handling data formatting adds moderate complexity."
+		},
+		{
+			"taskId": 20,
+			"taskTitle": "Develop PDF Report Generation Service",
+			"complexityScore": 7,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down the 'Develop PDF Report Generation Service' task into detailed subtasks covering retrieving data from PostgreSQL and MongoDB, structuring the report content, implementing PDF generation using a Go library, adding visualizations to the report, and testing report formatting and content.",
+			"reasoning": "Generating formatted documents like PDFs programmatically, especially pulling data from multiple sources and ensuring correct layout and content, can be complex and requires careful implementation and testing."
+		}
+	]
+}

@@ -1,0 +1,286 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 11,
+        "title": "Project Setup and Core Infrastructure Configuration",
+        "description": "Set up the foundational project structure including the Astro frontend, Go backend, and necessary databases (PostgreSQL, MongoDB, Redis) and cloud storage connections. Configure the CI/CD pipeline.",
+        "details": "Initialize Astro project with TypeScript. Set up Go module for the backend using Gin or Echo framework. Provision/configure PostgreSQL for metadata, MongoDB for raw data/documents, and Redis for caching/sessions. Establish connections from Go backend. Configure cloud storage (AWS S3 or Google Cloud) integration. Set up basic CI/CD pipeline for automated builds and deployments.",
+        "testStrategy": "Verify successful project initialization, framework setup, database connectivity, cloud storage access, and CI/CD pipeline execution with a simple test build.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Implement User Authentication and RBAC",
+        "description": "Implement the user authentication system and role-based access control (RBAC) for secure access to the platform.",
+        "details": "Develop Go backend endpoints for user registration and login. Use JWT for authentication tokens. Implement RBAC logic to control access based on user roles (Clinical Neurologist, Research Scientist, EEG Technologist). Integrate with PostgreSQL for user data storage. Ensure secure password handling.",
+        "testStrategy": "Unit tests for authentication logic and RBAC rules. Integration tests for login/registration endpoints. Verify access restrictions for different user roles.",
+        "priority": "high",
+        "dependencies": [
+          11
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Database Integration for User Data",
+            "description": "Design and implement the database schema for users, roles, and permissions. Set up the database connection and ORM.",
+            "dependencies": [],
+            "details": "Schema design (users, roles, permissions tables), ORM setup, connection configuration, initial migration.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement User Registration Endpoint",
+            "description": "Create an API endpoint to handle new user registration, including input validation, password hashing, and saving user data to the database.",
+            "dependencies": [
+              1
+            ],
+            "details": "Define registration route, validate user input (email format, password strength), hash password, save user record to database.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement User Login Endpoint",
+            "description": "Create an API endpoint to handle user login, validating provided credentials against the stored user data in the database.",
+            "dependencies": [
+              1
+            ],
+            "details": "Define login route, validate input credentials, retrieve user from database, compare hashed password.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement JWT Token Generation and Validation",
+            "description": "Add logic to generate a JWT upon successful login and create middleware or utility functions to validate JWTs on subsequent protected requests.",
+            "dependencies": [
+              3
+            ],
+            "details": "Generate signed JWT containing user identifier/roles after successful login, create middleware to extract and verify JWT from request headers, handle token expiration and invalid tokens.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement RBAC Logic",
+            "description": "Develop and integrate logic to enforce role-based access control on API endpoints based on the user's roles retrieved from the database and identified via the validated JWT.",
+            "dependencies": [
+              1,
+              4
+            ],
+            "details": "Define required roles/permissions for specific routes, create authorization middleware/decorators that check user's roles (from DB via user ID from JWT) against required permissions, deny access if unauthorized.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Develop EEG File Upload and Secure Storage",
+        "description": "Develop the frontend interface and backend logic for uploading EEG files (EDF, CSV, etc.) and storing them securely.",
+        "details": "Create an Astro component with drag-and-drop functionality for file upload. Implement Go backend API endpoint to receive files, validate format (EDF, EDF+, CSV, TXT), check size limits (up to 500MB), store temporarily, and upload to configured cloud storage (AWS S3/GCP). Implement progress tracking for large files. Associate uploaded files with authenticated users.",
+        "testStrategy": "Test file uploads for supported and unsupported formats/sizes. Verify files are stored correctly in cloud storage. Test drag-and-drop functionality and progress indicators in the frontend. Ensure only authenticated users can upload.",
+        "priority": "high",
+        "dependencies": [
+          11,
+          12
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 14,
+        "title": "Implement EEG Data Preprocessing Pipeline",
+        "description": "Build the backend pipeline for preprocessing uploaded EEG data.",
+        "details": "Implement Go functions for EEG preprocessing steps: bandpass filtering (0.5-40 Hz configurable), automated artifact removal, signal normalization/standardization, and epoch segmentation (configurable window sizes). Integrate this pipeline to process files retrieved from cloud storage after upload. Implement quality assessment scoring.",
+        "testStrategy": "Unit tests for each preprocessing step with sample data. Integration tests to process a full file and verify output characteristics (e.g., frequency content after filtering, data range after normalization). Validate artifact detection on known noisy data.",
+        "priority": "high",
+        "dependencies": [
+          11,
+          13
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 15,
+        "title": "Set up ML Model Serving Infrastructure",
+        "description": "Set up the infrastructure for serving the trained CNN-LSTM models.",
+        "details": "Deploy TensorFlow Serving or ONNX Runtime. Create a Go service that acts as a client to the model server. Implement logic for loading specific model versions and handling requests to the server. Configure GPU acceleration if available.",
+        "testStrategy": "Verify the model serving infrastructure is running and accessible from the Go service. Test loading a basic model and performing a simple inference request to confirm connectivity and functionality.",
+        "priority": "high",
+        "dependencies": [
+          11
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 16,
+        "title": "Implement CNN-LSTM Classification Logic",
+        "description": "Implement the core logic in the backend to perform CNN-LSTM classification on preprocessed EEG data.",
+        "details": "Create a Go API endpoint that receives preprocessed EEG data (or a reference to it). Send this data to the ML model serving service (Task 15) for inference using the appropriate CNN-LSTM model. Receive and process the classification results, including primary diagnosis, confidence scores, and probability distributions for supported disorders (Epilepsy, Parkinson's, ASD, Psychiatric). Ensure inference time is <200ms.",
+        "testStrategy": "Integration tests sending preprocessed data through the inference pipeline. Verify correct classification results and confidence scores are returned for known test cases from training datasets (Bonn, CHB-MIT, UCI). Measure inference latency.",
+        "priority": "high",
+        "dependencies": [
+          14,
+          15
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Integrate with ML Serving Client",
+            "description": "Establish the connection and data transfer mechanism with the ML serving client layer to send input data and receive model predictions.",
+            "dependencies": [],
+            "details": "Implement the necessary code to interface with the ML serving client library or API. This involves setting up the connection, handling data serialization/deserialization for sending preprocessed data, and receiving the raw model output tensor(s). Ensure error handling for connection issues and communication failures.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Prepare Preprocessed Data for Inference",
+            "description": "Transform the preprocessed input data into the specific tensor format (shape, dtype) required by the CNN-LSTM model for inference.",
+            "dependencies": [],
+            "details": "Take the output of the preprocessing step and convert it into the exact tensor structure expected by the loaded CNN-LSTM model. This may involve reshaping arrays, adding batch dimensions, ensuring correct data types (e.g., float32), and potentially converting to the tensor format of the serving framework (e.g., TensorFlow Tensor, PyTorch Tensor).",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Process Model Output",
+            "description": "Interpret the raw tensor output from the CNN-LSTM model and convert it into meaningful diagnostic results, scores, and probabilities.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Implement logic to parse the model's output tensor(s). This typically involves applying activation functions (like softmax for classification probabilities), determining the predicted class or diagnosis based on thresholds or argmax, extracting confidence scores, and structuring the final output into a defined format containing the diagnosis, associated probabilities for each class, and any other relevant scores.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Performance Testing and Optimization",
+            "description": "Measure the end-to-end inference latency of the classification logic and optimize the implementation to meet the <200ms performance requirement.",
+            "dependencies": [
+              3
+            ],
+            "details": "Implement timing mechanisms to measure the latency from receiving preprocessed data to outputting the final processed results. Conduct performance tests under realistic conditions. Analyze bottlenecks using profiling tools and apply optimization techniques such as batching inference requests, exploring model quantization options, optimizing data transfer, or refining the output processing logic to ensure the total inference time is consistently below 200ms.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 17,
+        "title": "Develop Analysis Results Processing and Storage",
+        "description": "Design and implement the database schema and backend logic for storing analysis results.",
+        "details": "Design PostgreSQL schema for storing analysis metadata (user, file reference, timestamp, status, primary diagnosis, confidence). Design MongoDB schema for storing detailed results (temporal classification results, probability distributions, quality scores, preprocessing parameters). Implement Go functions to save the results obtained from the classification logic (Task 16) into the respective databases.",
+        "testStrategy": "Unit tests for database interaction functions. Integration tests to run an analysis (Tasks 14, 16) and verify that the results are correctly stored in both PostgreSQL and MongoDB.",
+        "priority": "high",
+        "dependencies": [
+          11,
+          16
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 18,
+        "title": "Build Core Frontend User Interface (Dashboard, Upload, Progress)",
+        "description": "Build the core user interface components for the Astro frontend, including the dashboard, file upload interface, and analysis progress tracking.",
+        "details": "Develop the main dashboard page using Astro's static generation. Create interactive components (Islands) using React, Vue, or Svelte for the file upload interface (integrating with Task 13 frontend), a list/queue of ongoing/completed analyses, and progress indicators. Implement basic navigation and layout using Tailwind CSS. Integrate with the backend authentication (Task 12) to show user-specific data.",
+        "testStrategy": "Verify static pages load quickly. Test interactivity of island components (upload, list). Ensure data displayed is correct for the logged-in user. Test responsiveness across different devices.",
+        "priority": "high",
+        "dependencies": [
+          11,
+          12,
+          13
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 19,
+        "title": "Implement Frontend Results Visualization",
+        "description": "Implement frontend components to visualize the classification results and potentially basic EEG signal characteristics.",
+        "details": "Create Astro/React components to fetch analysis results from the Go backend API (Task 17). Display the primary diagnosis, confidence scores, and probability distributions. Implement basic data visualization for spectral analysis plots (power spectral density) or simplified temporal classification results. Use charting libraries compatible with React islands.",
+        "testStrategy": "Test fetching results for completed analyses. Verify classification results and confidence scores are displayed correctly. Validate that visualizations accurately represent the data from the backend.",
+        "priority": "medium",
+        "dependencies": [
+          17,
+          18
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up Data Fetching and Charting Libraries",
+            "description": "Implement the frontend logic to fetch analysis results from the backend API and integrate necessary charting libraries (e.g., Chart.js, D3.js, Plotly.js) for visualization.",
+            "dependencies": [],
+            "details": "Define API endpoints, implement data fetching logic (e.g., using fetch or Axios), choose and integrate charting library, ensure data format compatibility.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Display Classification Summary",
+            "description": "Implement the UI component to display the overall classification diagnosis and associated scores based on the fetched results.",
+            "dependencies": [
+              1
+            ],
+            "details": "Create UI elements (cards, text fields), parse summary data from fetched results, display diagnosis text and score values clearly.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement Spectral Analysis Visualization",
+            "description": "Develop the frontend component(s) to visualize spectral analysis results using the integrated charting library.",
+            "dependencies": [
+              1
+            ],
+            "details": "Identify spectral data within results, format data for charting library, create chart configuration (type, axes, labels), render spectral plot (e.g., line chart, heatmap).",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement Temporal Results Visualization",
+            "description": "Develop the frontend component(s) to visualize temporal results (e.g., time series data) using the integrated charting library.",
+            "dependencies": [
+              1
+            ],
+            "details": "Identify temporal data within results, format data for charting library, create chart configuration (type, axes, labels), render temporal plot (e.g., line chart, scatter plot).",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 20,
+        "title": "Develop PDF Report Generation Service",
+        "description": "Develop the backend service to generate detailed PDF reports from the stored analysis results.",
+        "details": "Implement a Go service that retrieves analysis results and associated metadata from PostgreSQL and MongoDB (Task 17). Use a PDF generation library in Go to create formatted reports. Include patient demographics (if available and anonymized), recording details, model predictions, confidence intervals, and potentially basic visualizations or recommended follow-up actions. Ensure reports are print-friendly.",
+        "testStrategy": "Test report generation for various analysis results. Verify all required information is included and formatted correctly in the PDF. Check report size and generation time.",
+        "priority": "medium",
+        "dependencies": [
+          17
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-07T04:58:12.666Z",
+      "updated": "2025-07-07T10:24:04.820Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
