@@ -75,7 +75,7 @@ Content-Type: application/json
 
 **Response**:
 ```json
-{
+{  
   "message": "User registered successfully",
   "user_id": 1
 }
