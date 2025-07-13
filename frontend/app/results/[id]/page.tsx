@@ -438,7 +438,7 @@ export default function ResultsPage() {
                     <p className="font-medium">99.39%</p>
                   </div>
                   <div>
-                    <p className="text-blue-600">Parkinson's Detection Accuracy</p>
+                    <p className="text-blue-600">Parkinson&apos;s Detection Accuracy</p>
                     <p className="font-medium">99.7%</p>
                   </div>
                 </div>
