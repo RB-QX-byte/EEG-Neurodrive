@@ -16,7 +16,10 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # Configuration
-MODEL_PATH = "cnn_lstm_model_efficient.h5"
+# Get the absolute path to the directory where this script is located
+script_dir = os.path.dirname(os.path.abspath(__file__))
+# Construct the absolute path to the model file
+MODEL_PATH = os.path.join(script_dir, "cnn_lstm_model_efficient.h5")
 DATA_COLUMNS = 54  # Expected number of feature columns
 
 # Disorder mapping (adjust based on your training data)

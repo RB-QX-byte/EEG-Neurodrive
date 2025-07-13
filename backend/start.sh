@@ -51,5 +51,14 @@ echo "========================================"
 echo "Press Ctrl+C to stop the server"
 echo ""
 
-# Run the server
-./eeg-backend 
+# Set environment variables if not already set
+if [ -z "$JWT_SECRET" ]; then
+    export JWT_SECRET="your-super-secure-secret-key-2025"
+fi
+
+if [ -z "$DB_PORT" ]; then
+    export DB_PORT="5433"
+fi
+
+# Run the server with environment variables
+JWT_SECRET="your-super-secure-secret-key-2025" DB_PORT="5433" ./eeg-backend

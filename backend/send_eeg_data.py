@@ -2,11 +2,13 @@ import requests
 import json
 import random
 import time
+import os
 
 # --- Configuration ---
 BASE_URL = "http://localhost:8080/api"
-# IMPORTANT: Replace with a valid JWT token obtained from the /api/login endpoint
-JWT_TOKEN = "your_jwt_token_here"
+# IMPORTANT: Set JWT_TOKEN environment variable with a valid token obtained from the /api/login endpoint
+
+JWT_TOKEN = os.environ.get("JWT_TOKEN", "")
 
 def generate_eeg_data():
     """Generates a dictionary with random float values for 19 channels."""
@@ -40,8 +42,8 @@ def send_data(token):
         print("Please ensure the backend server is running.")
 
 if __name__ == "__main__":
-    if JWT_TOKEN == "your_jwt_token_here":
-        print("Please update the JWT_TOKEN variable in this script with a valid token.")
+    if not JWT_TOKEN:
+        print("Please set the JWT_TOKEN environment variable with a valid token.")
         print("You can get a token by registering and then logging in via the API.")
         print("Example login with cURL (replace with your user):")
         print('curl -X POST http://localhost:8080/api/login -H "Content-Type: application/json" -d \'{"username":"testuser", "password":"password"}\'')

@@ -9,8 +9,13 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 
-# Define the input file path
-file_path = r"C:\Users\rachi\EEG\Model\normalized_eeg_data.csv"
+import sys
+
+# Define the input file path from command line arguments
+if len(sys.argv) != 2:
+    print("Usage: python EEG_Classification_report.py <path_to_csv>")
+    sys.exit(1)
+file_path = sys.argv[1]
 
 # --- Efficient Data Loading ---
 # Define batch size and target column
@@ -123,9 +128,10 @@ if test_dataset:
     print(f"Test Accuracy: {accuracy * 100:.2f}%")
 
     # Save the model
-    model_save_path = r"C:/Users/rachi/EEG/Model/cnn_lstm_model_efficient.h5"
-    model.save(model_save_path)
-    print(f"Model saved to {model_save_path}")
+    # Note: Model saving is commented out as this script is for reporting.
+    # model_save_path = "cnn_lstm_model_efficient.h5"
+    # model.save(model_save_path)
+    # print(f"Model saved to {model_save_path}")
 
     # --- Predictions and Confusion Matrix ---
     y_true = np.concatenate([y for _, y in test_dataset], axis=0)
