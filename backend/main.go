@@ -276,7 +276,7 @@ func initDB() {
 	host := getEnv("DB_HOST", "localhost")
 	user := getEnv("DB_USER", "postgres")
 	password := getEnv("DB_PASSWORD", "postgres")
-	dbname := getEnv("DB_NAME", "eeg_db")
+	dbname := getEnv("DB_NAME", "eegdb")
 	port := getEnv("DB_PORT", "5433")
 	sslmode := getEnv("DB_SSLMODE", "disable")
 
@@ -1068,7 +1068,7 @@ func processClassification(jobID uint) {
 	}
 
 	// Run the Python classification script
-	cmd := exec.Command("python", "../Model/EEG_Classification_report.py", job.FilePath)
+	cmd := exec.Command("python", "../Model/predict_with_model.py", job.FilePath)
 
 	var out, stderr bytes.Buffer
 	cmd.Stdout = &out

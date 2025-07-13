@@ -2,11 +2,11 @@
 -- Run this script with a PostgreSQL superuser (e.g., postgres)
 
 -- Create the database if it doesn't exist
-SELECT 'CREATE DATABASE eeg_db'
-WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'eeg_db')\gexec
+SELECT 'CREATE DATABASE eegdb'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'eegdb')\gexec
 
--- Connect to the eeg_db database
-\c eeg_db
+-- Connect to the eegdb database
+\c eegdb
 
 -- Install TimescaleDB extension
 CREATE EXTENSION IF NOT EXISTS timescaledb;
@@ -25,7 +25,7 @@ END
 $do$;
 
 -- Grant necessary permissions to multi user
-GRANT CONNECT ON DATABASE eeg_db TO multi;
+GRANT CONNECT ON DATABASE eegdb TO multi;
 GRANT USAGE ON SCHEMA public TO multi;
 GRANT CREATE ON SCHEMA public TO multi;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO multi;
@@ -85,6 +85,6 @@ CREATE INDEX IF NOT EXISTS idx_eeg_subjects_subject_id ON eeg_subjects (subject_
 
 -- Display completion message
 \echo 'TimescaleDB setup completed successfully!'
-\echo 'Database: eeg_db'
+\echo 'Database: eegdb'
 \echo 'User: multi'
 \echo 'You can now run the Go backend application.' 

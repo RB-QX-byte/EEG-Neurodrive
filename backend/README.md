@@ -35,14 +35,14 @@ A comprehensive Go backend for EEG (Electroencephalogram) analysis using CNN-LST
 
 3. **Set up PostgreSQL database**:
    ```sql
-   CREATE DATABASE eeg_db;
+   CREATE DATABASE eegdb;
    CREATE USER postgres WITH PASSWORD 'your_password';
-   GRANT ALL PRIVILEGES ON DATABASE eeg_db TO postgres;
+   GRANT ALL PRIVILEGES ON DATABASE eegdb TO postgres;
    ```
 
 4. **Update database configuration** in `main.go`:
    ```go
-   dsn := "host=localhost user=postgres password=your_password dbname=eeg_db port=5432 sslmode=disable TimeZone=UTC"
+   dsn := "host=localhost user=postgres password=your_password dbname=eegdb port=5432 sslmode=disable TimeZone=UTC"
    ```
 
 5. **Build the application**:
@@ -520,7 +520,7 @@ export JWT_SECRET="your-super-secure-secret-key"
 export DB_HOST="localhost"
 export DB_USER="postgres"
 export DB_PASSWORD="your-password"
-export DB_NAME="eeg_db"
+export DB_NAME="eegdb"
 export DB_PORT="5432"
 ```
 
