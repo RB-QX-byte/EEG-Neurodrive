@@ -4,6 +4,7 @@ import csv
 import glob
 import time
 import sys
+import os
 
 # --- Configuration ---
 BASE_URL = "http://localhost:8080/api"
@@ -56,11 +57,15 @@ def import_data(token):
         print(f"Finished processing {file_path}")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
+    jwt_token = os.environ.get("JWT_TOKEN")
+    if len(sys.argv) >= 2:
+        jwt_token = sys.argv[1]
+
+    if not jwt_token:
         print("Usage: python import_eeg_data.py <your_jwt_token_here>")
+        print("Or set the JWT_TOKEN environment variable with a valid token.")
         print("You can get a token by registering and then logging in via the API.")
         print("Example login with cURL (replace with your user):")
         print('curl -X POST http://localhost:8080/api/login -H "Content-Type: application/json" -d \'{"username":"testuser", "password":"password"}\'')
     else:
-        jwt_token = sys.argv[1]
         import_data(jwt_token)
