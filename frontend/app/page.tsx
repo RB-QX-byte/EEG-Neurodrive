@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Activity, Brain, Clock, FileText, TrendingUp, AlertCircle, CheckCircle, Loader2, Trash2, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { formatSafeDate } from "@/lib/date-utils"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -351,9 +352,27 @@ export default function Dashboard() {
             </TableHeader>
             <TableBody>
               {dashboardData?.recent_analyses && dashboardData.recent_analyses.length > 0 ? (
-                dashboardData.recent_analyses.slice(0, 10).map((analysis) => (
-                  <TableRow key={analysis.id}>
-                    <TableCell className="font-medium">{analysis.patient_id}</TableCell>
+                dashboardData.recent_analyses.slice(0, 10).map((analysis) => {
+                  const uniqueKey = analysis.id ?? `${analysis.patient_id}-${analysis.created_at}`;
+                  const isCorrupted = !analysis.id;
+
+                  return (
+                  <TableRow key={uniqueKey} className={isCorrupted ? "bg-red-50" : ""}>
+                    <TableCell className="font-medium">
+                      {isCorrupted && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <AlertCircle className="w-4 h-4 inline-block mr-2 text-red-500" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Corrupted data: Missing ID</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                      {analysis.patient_id}
+                      </TableCell>
                     <TableCell>{analysis.file_name}</TableCell>
                     {user?.role === 'admin' && (
                       <TableCell>
@@ -370,102 +389,105 @@ export default function Dashboard() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
-                        {analysis.status === "completed" && [
-                          <Button 
-                            key={`view-${analysis.id}`}
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => {
-                              if (analysis.id && !isNaN(analysis.id)) {
-                                router.push(`/results/${analysis.id}`)
-                              } else {
-                                setError("Invalid analysis ID. Cannot view results.")
-                              }
-                            }}
-                            disabled={!analysis.id || isNaN(analysis.id)}
-                            aria-label={`View results for ${analysis.patient_id}`}
-                          >
-                            View Results
-                          </Button>,
-                          <Button 
-                            key={`predict-${analysis.id}`}
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handlePredict(analysis)}
-                            disabled={predictingJobIds.has(analysis.id)}
-                            className="text-medical-blue hover:text-blue-700"
-                            aria-label={`Run prediction for ${analysis.patient_id}`}
-                          >
-                            {predictingJobIds.has(analysis.id) ? (
+                        {analysis.status === "completed" && (
+                          <>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                if (analysis.id) {
+                                  router.push(`/results/${analysis.id}`)
+                                } else {
+                                  setError("Invalid analysis ID. Cannot view results.")
+                                }
+                              }}
+                              disabled={!analysis.id}
+                              aria-label={`View results for ${analysis.patient_id}`}
+                            >
+                              View Results
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handlePredict(analysis)}
+                              disabled={!analysis.id || predictingJobIds.has(analysis.id)}
+                              className="text-medical-blue hover:text-blue-700"
+                              aria-label={`Run prediction for ${analysis.patient_id}`}
+                            >
+                              {predictingJobIds.has(analysis.id) ? (
+                                <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                              ) : (
+                                <Activity className="w-4 h-4 mr-1" />
+                              )}
+                              Predict
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleDeleteAnalysis(analysis.id)}
+                              disabled={!analysis.id}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              aria-label={`Delete analysis for ${analysis.patient_id}`}
+                            >
+                              <Trash2 className="w-4 h-4 mr-1" />
+                              Delete
+                            </Button>
+                          </>
+                        )}
+                        {analysis.status === "processing" && (
+                          <>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              disabled
+                              aria-label={`Processing analysis for ${analysis.patient_id}`}
+                            >
                               <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                            ) : (
-                              <Activity className="w-4 h-4 mr-1" />
-                            )}
-                            Predict
-                          </Button>,
-                          <Button 
-                            key={`delete-${analysis.id}`}
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleDeleteAnalysis(analysis.id)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            aria-label={`Delete analysis for ${analysis.patient_id}`}
-                          >
-                            <Trash2 className="w-4 h-4 mr-1" />
-                            Delete
-                          </Button>
-                        ]}
-                        {analysis.status === "processing" && [
-                          <Button 
-                            key={`processing-${analysis.id}`}
-                            variant="outline" 
-                            size="sm" 
-                            disabled
-                            aria-label={`Processing analysis for ${analysis.patient_id}`}
-                          >
-                            <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                            Processing...
-                          </Button>,
-                          <Button 
-                            key={`cancel-${analysis.id}`}
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleDeleteAnalysis(analysis.id)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            aria-label={`Cancel processing for ${analysis.patient_id}`}
-                          >
-                            <X className="w-4 h-4 mr-1" />
-                            Cancel
-                          </Button>
-                        ]}
-                        {analysis.status === "failed" && [
-                          <Button 
-                            key={`retry-${analysis.id}`}
-                            variant="outline" 
-                            size="sm"
-                            aria-label={`Retry analysis for ${analysis.patient_id}`}
-                          >
-                            Retry
-                          </Button>,
-                          <Button 
-                            key={`delete-failed-${analysis.id}`}
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleDeleteAnalysis(analysis.id)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            aria-label={`Delete failed analysis for ${analysis.patient_id}`}
-                          >
-                            <Trash2 className="w-4 h-4 mr-1" />
-                            Delete
-                          </Button>
-                        ]}
+                              Processing...
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleDeleteAnalysis(analysis.id)}
+                              disabled={!analysis.id}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              aria-label={`Cancel processing for ${analysis.patient_id}`}
+                            >
+                              <X className="w-4 h-4 mr-1" />
+                              Cancel
+                            </Button>
+                          </>
+                        )}
+                        {analysis.status === "failed" && (
+                          <>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              disabled={!analysis.id}
+                              aria-label={`Retry analysis for ${analysis.patient_id}`}
+                            >
+                              Retry
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleDeleteAnalysis(analysis.id)}
+                              disabled={!analysis.id}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              aria-label={`Delete failed analysis for ${analysis.patient_id}`}
+                            >
+                              <Trash2 className="w-4 h-4 mr-1" />
+                              Delete
+                            </Button>
+                          </>
+                        )}
                         {/* Cancel/Delete button for other statuses like queued */}
                         {!["completed", "processing", "failed"].includes(analysis.status) && (
                           <Button 
-                            key={`delete-other-${analysis.id}`}
                             variant="outline" 
                             size="sm"
                             onClick={() => handleDeleteAnalysis(analysis.id)}
+                            disabled={!analysis.id}
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
                             aria-label={`Cancel analysis for ${analysis.patient_id}`}
                           >
@@ -476,7 +498,7 @@ export default function Dashboard() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))
+                )})
               ) : (
                 <TableRow>
                   <TableCell colSpan={user?.role === 'admin' ? 8 : 7} className="text-center py-8 text-gray-500">

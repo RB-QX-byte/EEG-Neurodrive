@@ -345,7 +345,7 @@ export default function UploadPage() {
                         file.priority === "urgent" ? "destructive" :
                         file.priority === "normal" ? "default" : "secondary"
                       }>
-                        {file.priority?.charAt(0).toUpperCase() + file.priority?.slice(1)}
+                        {file.priority ? file.priority.charAt(0).toUpperCase() + file.priority.slice(1) : ''}
                       </Badge>
                     </TableCell>
                     <TableCell>{getStatusBadge(file.status)}</TableCell>

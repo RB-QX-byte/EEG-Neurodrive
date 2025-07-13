@@ -16,6 +16,9 @@ export interface LoginResponse {
 export interface AnalysisJob {
   id: number;
   user_id: number;
+  user?: {
+    username?: string;
+  };
   patient_id: string;
   file_name: string;
   file_path: string;

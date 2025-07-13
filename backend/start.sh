@@ -80,5 +80,9 @@ if [ -z "$DB_SSLMODE" ]; then
     export DB_SSLMODE="disable"
 fi
 
+if [ -z "$PYTHON_PATH" ]; then
+    export PYTHON_PATH="C:/Users/rachi/AppData/Local/Programs/Python/Python310/python.exe"
+fi
+
 # Run the server with environment variables
-JWT_SECRET="$JWT_SECRET" DB_HOST="$DB_HOST" DB_USER="$DB_USER" DB_PASSWORD="$DB_PASSWORD" DB_NAME="$DB_NAME" DB_PORT="$DB_PORT" DB_SSLMODE="$DB_SSLMODE" ./eeg-backend
+JWT_SECRET="$JWT_SECRET" DB_HOST="$DB_HOST" DB_USER="$DB_USER" DB_PASSWORD="$DB_PASSWORD" DB_NAME="$DB_NAME" DB_PORT="$DB_PORT" DB_SSLMODE="$DB_SSLMODE" PYTHON_PATH="$PYTHON_PATH" ./eeg-backend

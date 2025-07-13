@@ -315,7 +315,7 @@ export default function ResultsLibrary() {
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
                 {getUniqueValues("status").map((status) => (
-                  <SelectItem key={status} value={status}>{status}</SelectItem>
+                  <SelectItem key={status} value={status || ''}>{status}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -327,7 +327,7 @@ export default function ResultsLibrary() {
               <SelectContent>
                 <SelectItem value="all">All Diagnoses</SelectItem>
                 {getUniqueValues("diagnosis").map((diagnosis) => (
-                  <SelectItem key={diagnosis} value={diagnosis}>{diagnosis}</SelectItem>
+                  <SelectItem key={diagnosis} value={diagnosis || ''}>{diagnosis}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -407,13 +407,12 @@ export default function ResultsLibrary() {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              if (result.id && !isNaN(result.id)) {
+                              if (result.id) {
                                 router.push(`/results/${result.id}`)
                               } else {
-                                console.error("Invalid result ID:", result.id)
+                                setError("Analysis result is missing ID. Please refresh and try again.")
                               }
                             }}
-                            disabled={!result.id || isNaN(result.id)}
                             className="text-medical-blue hover:text-blue-700"
                           >
                             <Eye className="w-4 h-4 mr-1" />

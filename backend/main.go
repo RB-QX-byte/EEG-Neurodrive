@@ -75,7 +75,10 @@ func (EEGDataPoint) TableName() string {
 
 // AnalysisJob represents an EEG analysis job
 type AnalysisJob struct {
-	gorm.Model
+	ID            uint            `json:"id" gorm:"primarykey"`
+	CreatedAt     time.Time       `json:"created_at"`
+	UpdatedAt     time.Time       `json:"updated_at"`
+	DeletedAt     gorm.DeletedAt  `json:"deleted_at,omitempty" gorm:"index"`
 	UserID        uint            `json:"user_id" gorm:"index"`
 	User          User            `json:"user" gorm:"foreignKey:UserID"`
 	PatientID     string          `json:"patient_id"`
@@ -1089,7 +1092,8 @@ func processClassification(jobID uint) {
 	}
 
 	// Run the Python classification script
-	cmd := exec.Command("python", "../Model/predict_with_model.py", job.FilePath)
+	pythonPath := getEnv("PYTHON_PATH", "C:/Users/rachi/AppData/Local/Programs/Python/Python310/python.exe")
+	cmd := exec.Command(pythonPath, "../Model/predict_with_model.py", job.FilePath)
 
 	var out, stderr bytes.Buffer
 	cmd.Stdout = &out
@@ -1166,7 +1170,8 @@ func processPrediction(jobID uint) {
 	DB.Save(&job)
 
 	// Run the Python prediction script with the pre-trained model
-	cmd := exec.Command("python", "../Model/predict_with_model.py", job.FilePath)
+	pythonPath := getEnv("PYTHON_PATH", "C:/Users/rachi/AppData/Local/Programs/Python/Python310/python.exe")
+	cmd := exec.Command(pythonPath, "../Model/predict_with_model.py", job.FilePath)
 
 	var out, stderr bytes.Buffer
 	cmd.Stdout = &out
