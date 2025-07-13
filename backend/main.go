@@ -531,6 +531,13 @@ func predictHandler(c *gin.Context) {
 func getDashboardHandler(c *gin.Context) {
 	userID := getUserIDFromContext(c)
 
+	// Get current user to check role
+	var currentUser User
+	if result := DB.First(&currentUser, userID); result.Error != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		return
+	}
+
 	// Calculate stats
 	var stats struct {
 		FilesProcessedToday int     `json:"files_processed_today"`
@@ -543,11 +550,17 @@ func getDashboardHandler(c *gin.Context) {
 	today := time.Now().Truncate(24 * time.Hour)
 	var filesToday int64
 	var pendingCount int64
-	DB.Model(&AnalysisJob{}).Where("user_id = ? AND status = ? AND completed_at >= ?", userID, "completed", today).Count(&filesToday)
-	stats.FilesProcessedToday = int(filesToday)
 
-	// Pending analyses
-	DB.Model(&AnalysisJob{}).Where("user_id = ? AND status IN ?", userID, []string{"queued", "processing"}).Count(&pendingCount)
+	// Admin can see all users' data, regular users see only their own
+	if currentUser.Role == "admin" {
+		DB.Model(&AnalysisJob{}).Where("status = ? AND completed_at >= ?", "completed", today).Count(&filesToday)
+		DB.Model(&AnalysisJob{}).Where("status IN ?", []string{"queued", "processing"}).Count(&pendingCount)
+	} else {
+		DB.Model(&AnalysisJob{}).Where("user_id = ? AND status = ? AND completed_at >= ?", userID, "completed", today).Count(&filesToday)
+		DB.Model(&AnalysisJob{}).Where("user_id = ? AND status IN ?", userID, []string{"queued", "processing"}).Count(&pendingCount)
+	}
+
+	stats.FilesProcessedToday = int(filesToday)
 	stats.PendingAnalyses = int(pendingCount)
 
 	// Accuracy rate (mock calculation - in real system, this would be based on validated results)
@@ -562,13 +575,21 @@ func getDashboardHandler(c *gin.Context) {
 		stats.AvgProcessingTime = 0.0
 	}
 
-	// Recent analyses
+	// Recent analyses - admin sees all, users see only their own
 	var recentAnalyses []AnalysisJob
-	DB.Where("user_id = ?", userID).Order("created_at DESC").Limit(10).Preload("Result").Find(&recentAnalyses)
+	if currentUser.Role == "admin" {
+		DB.Order("created_at DESC").Limit(10).Preload("Result").Preload("User").Find(&recentAnalyses)
+	} else {
+		DB.Where("user_id = ?", userID).Order("created_at DESC").Limit(10).Preload("Result").Find(&recentAnalyses)
+	}
 
 	// Queue status
 	var queueStatus []AnalysisJob
-	DB.Where("user_id = ? AND status IN ?", userID, []string{"queued", "processing"}).Order("created_at ASC").Limit(5).Find(&queueStatus)
+	if currentUser.Role == "admin" {
+		DB.Where("status IN ?", []string{"queued", "processing"}).Order("created_at ASC").Limit(5).Preload("User").Find(&queueStatus)
+	} else {
+		DB.Where("user_id = ? AND status IN ?", userID, []string{"queued", "processing"}).Order("created_at ASC").Limit(5).Find(&queueStatus)
+	}
 
 	response := DashboardResponse{
 		Stats:          stats,

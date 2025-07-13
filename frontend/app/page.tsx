@@ -341,6 +341,7 @@ export default function Dashboard() {
               <TableRow>
                 <TableHead>Patient ID</TableHead>
                 <TableHead>File Name</TableHead>
+                {user?.role === 'admin' && <TableHead>User</TableHead>}
                 <TableHead>Upload Time</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Disorder Detected</TableHead>
@@ -354,6 +355,11 @@ export default function Dashboard() {
                   <TableRow key={analysis.id}>
                     <TableCell className="font-medium">{analysis.patient_id}</TableCell>
                     <TableCell>{analysis.file_name}</TableCell>
+                    {user?.role === 'admin' && (
+                      <TableCell>
+                        <Badge variant="outline">{analysis.user?.username || `User ${analysis.user_id}`}</Badge>
+                      </TableCell>
+                    )}
                     <TableCell>{formatSafeDate(analysis.created_at)}</TableCell>
                     <TableCell>{getStatusBadge(analysis.status)}</TableCell>
                     <TableCell>
@@ -473,7 +479,7 @@ export default function Dashboard() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                  <TableCell colSpan={user?.role === 'admin' ? 8 : 7} className="text-center py-8 text-gray-500">
                     No recent analyses found
                   </TableCell>
                 </TableRow>
