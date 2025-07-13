@@ -56,9 +56,29 @@ if [ -z "$JWT_SECRET" ]; then
     export JWT_SECRET="your-super-secure-secret-key-2025"
 fi
 
+if [ -z "$DB_HOST" ]; then
+    export DB_HOST="localhost"
+fi
+
+if [ -z "$DB_USER" ]; then
+    export DB_USER="postgres"
+fi
+
+if [ -z "$DB_PASSWORD" ]; then
+    export DB_PASSWORD="postgres"
+fi
+
+if [ -z "$DB_NAME" ]; then
+    export DB_NAME="eeg_db"
+fi
+
 if [ -z "$DB_PORT" ]; then
-    export DB_PORT="5433"
+    export DB_PORT="5432"
+fi
+
+if [ -z "$DB_SSLMODE" ]; then
+    export DB_SSLMODE="disable"
 fi
 
 # Run the server with environment variables
-JWT_SECRET="your-super-secure-secret-key-2025" DB_PORT="5433" ./eeg-backend
+JWT_SECRET="$JWT_SECRET" DB_HOST="$DB_HOST" DB_USER="$DB_USER" DB_PASSWORD="$DB_PASSWORD" DB_NAME="$DB_NAME" DB_PORT="$DB_PORT" DB_SSLMODE="$DB_SSLMODE" ./eeg-backend
