@@ -179,7 +179,19 @@ type PredictRequest struct {
 }
 
 // --- Globals ---
-var jwtKey = []byte("my_secret_key") // IMPORTANT: Use a secure key from env variables in production
+// jwtKey holds the secret key for signing JWT tokens. It is loaded from the
+// JWT_SECRET environment variable. The application will refuse to start if the
+// variable is not set to avoid using an insecure hard coded secret.
+var jwtKey []byte
+
+func init() {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		log.Fatal("JWT_SECRET environment variable not set")
+	}
+	jwtKey = []byte(secret)
+}
+
 var DB *gorm.DB
 
 // --- Main Function ---
@@ -390,9 +402,17 @@ func uploadHandler(c *gin.Context) {
 	// Create uploads directory if it doesn't exist
 	os.MkdirAll("uploads", 0755)
 
-	// Generate unique filename
-	filename := fmt.Sprintf("%d_%s", time.Now().Unix(), file.Filename)
+	// Sanitize filename to prevent path traversal
+	cleanName := filepath.Base(file.Filename)
+	filename := fmt.Sprintf("%d_%s", time.Now().Unix(), cleanName)
 	dst := filepath.Join("uploads", filename)
+	dst = filepath.Clean(dst)
+
+	// Ensure the cleaned path is still within the uploads directory
+	if !strings.HasPrefix(dst, filepath.Clean("uploads")+string(os.PathSeparator)) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid file name"})
+		return
+	}
 
 	if err := c.SaveUploadedFile(file, dst); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
@@ -496,8 +516,16 @@ func predictHandler(c *gin.Context) {
 
 	userID := getUserIDFromContext(c)
 
+	// Sanitize and restrict file path to the uploads directory
+	cleanPath := filepath.Clean(req.FilePath)
+	uploadsDir := filepath.Clean("uploads") + string(os.PathSeparator)
+	if !strings.HasPrefix(cleanPath, uploadsDir) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid file path"})
+		return
+	}
+
 	// Check if file exists
-	if !fileExists(req.FilePath) {
+	if !fileExists(cleanPath) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
 		return
 	}
@@ -506,8 +534,8 @@ func predictHandler(c *gin.Context) {
 	job := AnalysisJob{
 		UserID:        userID,
 		PatientID:     req.PatientID,
-		FileName:      filepath.Base(req.FilePath),
-		FilePath:      req.FilePath,
+		FileName:      filepath.Base(cleanPath),
+		FilePath:      cleanPath,
 		Status:        "processing",
 		Priority:      "normal",
 		EstimatedTime: 2, // Prediction is faster than training
@@ -918,13 +946,21 @@ func importEEGDataHandler(c *gin.Context) {
 		return
 	}
 
+	// Sanitize and restrict file path to the uploads directory
+	cleanPath := filepath.Clean(req.FilePath)
+	uploadsDir := filepath.Clean("uploads") + string(os.PathSeparator)
+	if !strings.HasPrefix(cleanPath, uploadsDir) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid file path"})
+		return
+	}
+
 	// Process import in background
-	go importEEGFromCSV(req.FilePath, req.SubjectID)
+	go importEEGFromCSV(cleanPath, req.SubjectID)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message":    "Import started",
 		"subject_id": req.SubjectID,
-		"file_path":  req.FilePath,
+		"file_path":  cleanPath,
 	})
 }
 
