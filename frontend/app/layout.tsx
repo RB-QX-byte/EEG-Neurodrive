@@ -8,6 +8,7 @@ import { Inter } from "next/font/google"
 import { Sidebar } from "@/components/layout/sidebar"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider, useAuth } from "@/lib/auth-context"
+import { ErrorBoundary } from "@/components/error-boundary"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -51,12 +52,14 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 
   // Authenticated user, show full layout with sidebar
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
-      <main className="flex-1 overflow-auto">
-        <div className="p-6">{children}</div>
-      </main>
-    </div>
+    <ErrorBoundary>
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
+        <main className="flex-1 overflow-auto">
+          <div className="p-6">{children}</div>
+        </main>
+      </div>
+    </ErrorBoundary>
   )
 }
 

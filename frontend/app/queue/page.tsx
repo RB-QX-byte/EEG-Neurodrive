@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { analysisAPI, AnalysisJob } from "@/lib/api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -8,208 +9,163 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Checkbox } from "@/components/ui/checkbox"
-import {
-  Search,
-  Download,
-  RefreshCw,
-  Trash2,
-  Play,
-  Pause,
-  CheckCircle,
-  AlertCircle,
-  Clock,
-  Loader2,
-  Activity,
-} from "lucide-react"
-
-interface QueueItem {
-  id: string
-  fileName: string
-  patientId: string
-  uploadTime: string
-  status: "queued" | "processing" | "completed" | "failed" | "cancelled"
-  priority: "normal" | "urgent" | "routine"
-  estimatedCompletion: string
-  progress?: number
-  disorder?: string
-  confidence?: number
-}
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Progress } from "@/components/ui/progress"
+import { Search, RefreshCw, Trash2, CheckCircle, AlertCircle, Clock, Loader2, Activity, Eye, Pause, Play } from "lucide-react"
+import { formatSafeDate } from "@/lib/date-utils"
+import { formatFileSize } from "@/lib/string-formatters"
 
 export default function QueuePage() {
-  const [queueData, setQueueData] = useState<QueueItem[]>([])
-  const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [queueData, setQueueData] = useState<AnalysisJob[]>([])
+  const [selectedItems, setSelectedItems] = useState<number[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [priorityFilter, setPriorityFilter] = useState("all")
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState("")
 
-  const filteredData = queueData.filter((item) => {
-    const matchesSearch =
-      item.fileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.patientId.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === "all" || item.status === statusFilter
-    const matchesPriority = priorityFilter === "all" || item.priority === priorityFilter
+  useEffect(() => {
+    fetchQueueData()
+    // Refresh every 10 seconds for real-time updates
+    const interval = setInterval(fetchQueueData, 10000)
+    return () => clearInterval(interval)
+  }, [])
 
-    return matchesSearch && matchesStatus && matchesPriority
-  })
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "completed":
-        return (
-          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            Completed
-          </Badge>
-        )
-      case "processing":
-        return (
-          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-            Processing
-          </Badge>
-        )
-      case "queued":
-        return (
-          <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
-            <Clock className="w-3 h-3 mr-1" />
-            Queued
-          </Badge>
-        )
-      case "failed":
-        return (
-          <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
-            <AlertCircle className="w-3 h-3 mr-1" />
-            Failed
-          </Badge>
-        )
-      case "cancelled":
-        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Cancelled</Badge>
-      default:
-        return <Badge variant="secondary">Unknown</Badge>
+  const fetchQueueData = async () => {
+    try {
+      setError("")
+      const response = await analysisAPI.getQueue(
+        statusFilter !== "all" ? statusFilter : undefined,
+        priorityFilter !== "all" ? priorityFilter : undefined,
+        searchTerm || undefined
+      )
+      setQueueData(response.jobs)
+    } catch (err: any) {
+      setError(err.message || "Failed to load queue data")
+      console.error("Queue error:", err)
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case "urgent":
-        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Urgent</Badge>
-      case "normal":
-        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Normal</Badge>
-      case "routine":
-        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">Routine</Badge>
-      default:
-        return <Badge variant="secondary">Unknown</Badge>
+  const handleBulkCancel = async () => {
+    if (selectedItems.length === 0) return
+    
+    try {
+      await Promise.all(
+        selectedItems.map(jobId => analysisAPI.cancelJob(jobId))
+      )
+      setSelectedItems([])
+      fetchQueueData()
+    } catch (err: any) {
+      setError(err.message || "Failed to cancel selected jobs")
+    }
+  }
+
+  const handleUpdatePriority = async (jobId: number, priority: string) => {
+    try {
+      await analysisAPI.updatePriority(jobId, priority)
+      fetchQueueData()
+    } catch (err: any) {
+      setError(err.message || "Failed to update priority")
     }
   }
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedItems(filteredData.map((item) => item.id))
+      setSelectedItems(queueData.map(job => job.id))
     } else {
       setSelectedItems([])
     }
   }
 
-  const handleSelectItem = (itemId: string, checked: boolean) => {
+  const handleSelectItem = (jobId: number, checked: boolean) => {
     if (checked) {
-      setSelectedItems([...selectedItems, itemId])
+      setSelectedItems(prev => [...prev, jobId])
     } else {
-      setSelectedItems(selectedItems.filter((id) => id !== itemId))
+      setSelectedItems(prev => prev.filter(id => id !== jobId))
     }
   }
 
-  const handleBulkAction = (action: string) => {
-    console.log(`Performing ${action} on items:`, selectedItems)
-    // Implement bulk actions here
-    setSelectedItems([])
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return <CheckCircle className="w-4 h-4 text-green-500" />
+      case 'failed':
+        return <AlertCircle className="w-4 h-4 text-red-500" />
+      case 'processing':
+        return <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
+      case 'queued':
+        return <Clock className="w-4 h-4 text-yellow-500" />
+      default:
+        return <Activity className="w-4 h-4 text-gray-500" />
+    }
   }
 
-  const queueStats = {
-    total: queueData.length,
-    queued: queueData.filter((item) => item.status === "queued").length,
-    processing: queueData.filter((item) => item.status === "processing").length,
-    completed: queueData.filter((item) => item.status === "completed").length,
-    failed: queueData.filter((item) => item.status === "failed").length,
+  const getStatusBadge = (status: string) => {
+    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+      completed: "default",
+      failed: "destructive", 
+      processing: "secondary",
+      queued: "outline"
+    }
+    return (
+      <Badge variant={variants[status] || "outline"}>
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </Badge>
+    )
+  }
+
+  const getPriorityBadge = (priority: string) => {
+    const colors: Record<string, string> = {
+      urgent: "bg-red-100 text-red-800",
+      normal: "bg-blue-100 text-blue-800", 
+      routine: "bg-gray-100 text-gray-800"
+    }
+    return (
+      <Badge className={colors[priority] || colors.normal}>
+        {priority.charAt(0).toUpperCase() + priority.slice(1)}
+      </Badge>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-medical-blue" />
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-medical-blue to-blue-600 text-white p-6 rounded-lg">
-        <div className="flex items-center space-x-3">
-          <Activity className="w-8 h-8" />
-          <div>
-            <h1 className="text-2xl font-bold">Analysis Queue</h1>
-            <p className="text-blue-100">Monitor and manage EEG analysis processing queue</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Queue Statistics */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-gray-900">{queueStats.total}</p>
-              <p className="text-sm text-gray-600">Total Files</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-gray-600">{queueStats.queued}</p>
-              <p className="text-sm text-gray-600">Queued</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-blue-600">{queueStats.processing}</p>
-              <p className="text-sm text-gray-600">Processing</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-green-600">{queueStats.completed}</p>
-              <p className="text-sm text-gray-600">Completed</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-red-600">{queueStats.failed}</p>
-              <p className="text-sm text-gray-600">Failed</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters and Search */}
       <Card>
         <CardHeader>
-          <CardTitle>Queue Management</CardTitle>
-          <CardDescription>Search, filter, and manage analysis queue items</CardDescription>
+          <CardTitle className="flex items-center space-x-2">
+            <Activity className="w-5 h-5 text-medical-blue" />
+            <span>Analysis Queue</span>
+          </CardTitle>
+          <CardDescription>
+            Monitor and manage EEG analysis jobs in real-time
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-4">
+        <CardContent className="space-y-4">
+          {/* Filters and Search */}
+          <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search by file name or patient ID..."
+                  placeholder="Search by patient ID or filename..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-9"
                 />
               </div>
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Status" />
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
@@ -220,8 +176,8 @@ export default function QueuePage() {
               </SelectContent>
             </Select>
             <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Priority" />
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by priority" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Priority</SelectItem>
@@ -230,29 +186,35 @@ export default function QueuePage() {
                 <SelectItem value="routine">Routine</SelectItem>
               </SelectContent>
             </Select>
+            <Button onClick={fetchQueueData} variant="outline">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
+            </Button>
           </div>
 
           {/* Bulk Actions */}
           {selectedItems.length > 0 && (
-            <div className="flex items-center space-x-2 mb-4 p-3 bg-blue-50 rounded-lg">
-              <span className="text-sm font-medium">{selectedItems.length} items selected</span>
-              <Button size="sm" variant="outline" onClick={() => handleBulkAction("cancel")}>
-                <Pause className="w-4 h-4 mr-1" />
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+              <span className="text-sm text-blue-800">
+                {selectedItems.length} item(s) selected
+              </span>
+              <Button 
+                onClick={handleBulkCancel}
+                variant="destructive"
+                size="sm"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
                 Cancel Selected
               </Button>
-              <Button size="sm" variant="outline" onClick={() => handleBulkAction("retry")}>
-                <RefreshCw className="w-4 h-4 mr-1" />
-                Retry Failed
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => handleBulkAction("export")}>
-                <Download className="w-4 h-4 mr-1" />
-                Export Results
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => handleBulkAction("delete")}>
-                <Trash2 className="w-4 h-4 mr-1" />
-                Delete
-              </Button>
             </div>
+          )}
+
+          {/* Error Alert */}
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           )}
 
           {/* Queue Table */}
@@ -261,88 +223,81 @@ export default function QueuePage() {
               <TableRow>
                 <TableHead className="w-12">
                   <Checkbox
-                    checked={selectedItems.length === filteredData.length && filteredData.length > 0}
+                    checked={selectedItems.length === queueData.length && queueData.length > 0}
                     onCheckedChange={handleSelectAll}
                   />
                 </TableHead>
-                <TableHead>File Name</TableHead>
                 <TableHead>Patient ID</TableHead>
-                <TableHead>Upload Time</TableHead>
+                <TableHead>File</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Priority</TableHead>
-                <TableHead>Est. Completion</TableHead>
-                <TableHead>Results</TableHead>
+                <TableHead>Progress</TableHead>
+                <TableHead>Created</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredData.map((item) => (
-                <TableRow key={item.id}>
+              {queueData.map((job) => (
+                <TableRow key={job.id}>
                   <TableCell>
                     <Checkbox
-                      checked={selectedItems.includes(item.id)}
-                      onCheckedChange={(checked) => handleSelectItem(item.id, checked as boolean)}
+                      checked={selectedItems.includes(job.id)}
+                      onCheckedChange={(checked) => handleSelectItem(job.id, checked as boolean)}
                     />
                   </TableCell>
-                  <TableCell className="font-medium">{item.fileName}</TableCell>
-                  <TableCell>{item.patientId}</TableCell>
-                  <TableCell>{item.uploadTime}</TableCell>
+                  <TableCell className="font-medium">{job.patient_id}</TableCell>
                   <TableCell>
-                    <div className="space-y-1">
-                      {getStatusBadge(item.status)}
-                      {item.status === "processing" && item.progress && (
-                        <div className="w-20">
-                          <div className="text-xs text-gray-500 mb-1">{item.progress}%</div>
-                          <div className="w-full bg-gray-200 rounded-full h-1">
-                            <div
-                              className="bg-blue-600 h-1 rounded-full transition-all duration-300"
-                              style={{ width: `${item.progress}%` }}
-                            />
-                          </div>
-                        </div>
-                      )}
+                    <div>
+                      <p className="font-medium truncate max-w-[200px]">{job.file_name}</p>
+                      <p className="text-xs text-gray-500">{formatFileSize(job.file_size)}</p>
                     </div>
                   </TableCell>
-                  <TableCell>{getPriorityBadge(item.priority)}</TableCell>
-                  <TableCell>{item.estimatedCompletion}</TableCell>
                   <TableCell>
-                    {item.disorder && item.confidence && (
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium">{item.disorder}</p>
-                        <Badge
-                          className={`text-xs ${
-                            item.confidence >= 90
-                              ? "bg-green-100 text-green-800"
-                              : item.confidence >= 70
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {item.confidence}%
-                        </Badge>
-                      </div>
-                    )}
+                    <div className="flex items-center space-x-2">
+                      {getStatusIcon(job.status)}
+                      {getStatusBadge(job.status)}
+                    </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex space-x-2">
-                      {item.status === "completed" && (
-                        <Button variant="outline" size="sm">
-                          View Results
-                        </Button>
-                      )}
-                      {item.status === "processing" && (
-                        <Button variant="outline" size="sm">
-                          <Pause className="w-4 h-4" />
-                        </Button>
-                      )}
-                      {item.status === "failed" && (
-                        <Button variant="outline" size="sm">
-                          <RefreshCw className="w-4 h-4" />
-                        </Button>
-                      )}
-                      {item.status === "queued" && (
-                        <Button variant="outline" size="sm">
-                          <Play className="w-4 h-4" />
+                    <Select 
+                      value={job.priority}
+                      onValueChange={(value) => handleUpdatePriority(job.id, value)}
+                    >
+                      <SelectTrigger className="w-[100px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="urgent">Urgent</SelectItem>
+                        <SelectItem value="normal">Normal</SelectItem>
+                        <SelectItem value="routine">Routine</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell>
+                    {job.status === 'processing' ? (
+                      <div className="space-y-1">
+                        <Progress value={job.progress} className="w-[100px]" />
+                        <p className="text-xs text-gray-500">{job.progress}%</p>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-gray-500">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-sm text-gray-500">
+                    {formatSafeDate(job.created_at)}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-2">
+                      <Button variant="ghost" size="sm">
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      {(job.status === 'queued' || job.status === 'processing') && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => analysisAPI.cancelJob(job.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       )}
                     </div>
@@ -351,6 +306,13 @@ export default function QueuePage() {
               ))}
             </TableBody>
           </Table>
+
+          {queueData.length === 0 && (
+            <div className="text-center py-8">
+              <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500">No analysis jobs found</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
