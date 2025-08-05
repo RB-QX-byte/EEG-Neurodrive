@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/lib/auth-context"
+import { useQueue } from "@/lib/queue-context"
 import {
   Brain,
   LayoutDashboard,
@@ -24,7 +25,7 @@ import {
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Upload Files", href: "/upload", icon: Upload },
-  { name: "Analysis Queue", href: "/queue", icon: Activity, badge: "7" },
+  { name: "Analysis Queue", href: "/queue", icon: Activity, showBadge: true },
   { name: "Results Library", href: "/results", icon: FileText },
   { name: "Reports", href: "/reports", icon: BarChart3 },
   { name: "EEG Data", href: "/eeg-data", icon: Database },
@@ -39,6 +40,7 @@ interface SidebarProps {
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname()
   const { user, logout } = useAuth()
+  const { unviewedCount } = useQueue()
 
   const handleLogout = () => {
     logout()
@@ -84,7 +86,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 {!collapsed && (
                   <>
                     <span className="flex-1">{item.name}</span>
-                    {item.badge && (
+                    {item.showBadge && unviewedCount > 0 && (
                       <Badge
                         variant={isActive ? "secondary" : "default"}
                         className={cn(
@@ -92,7 +94,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                           isActive ? "bg-white text-medical-blue" : "bg-medical-blue text-white",
                         )}
                       >
-                        {item.badge}
+                        {unviewedCount}
                       </Badge>
                     )}
                   </>

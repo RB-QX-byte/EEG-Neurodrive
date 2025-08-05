@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { analysisAPI, AnalysisJob } from "@/lib/api"
+import { useQueue } from "@/lib/queue-context"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -14,6 +15,7 @@ import { Progress } from "@/components/ui/progress"
 import { Search, RefreshCw, Trash2, CheckCircle, AlertCircle, Clock, Loader2, Activity, Eye, Pause, Play } from "lucide-react"
 import { formatSafeDate } from "@/lib/date-utils"
 import { formatFileSize } from "@/lib/string-formatters"
+import { cn } from "@/lib/utils"
 
 export default function QueuePage() {
   const [queueData, setQueueData] = useState<AnalysisJob[]>([])
@@ -23,6 +25,7 @@ export default function QueuePage() {
   const [priorityFilter, setPriorityFilter] = useState("all")
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
+  const { markAsViewed, isJobViewed, refreshUnviewedCount } = useQueue()
 
   useEffect(() => {
     fetchQueueData()
@@ -40,6 +43,8 @@ export default function QueuePage() {
         searchTerm || undefined
       )
       setQueueData(response.jobs)
+      // Refresh unviewed count after fetching queue data
+      await refreshUnviewedCount()
     } catch (err: any) {
       setError(err.message || "Failed to load queue data")
       console.error("Queue error:", err)
@@ -85,6 +90,14 @@ export default function QueuePage() {
     } else {
       setSelectedItems(prev => prev.filter(id => id !== jobId))
     }
+  }
+
+  const handleViewJob = (job: AnalysisJob) => {
+    if (job.status === 'completed' && !isJobViewed(job.id)) {
+      markAsViewed(job.id)
+    }
+    // Here you could navigate to a detailed view or show a modal
+    // For now, we'll just mark it as viewed
   }
 
   const getStatusIcon = (status: string) => {
@@ -288,7 +301,16 @@ export default function QueuePage() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleViewJob(job)}
+                        className={cn(
+                          job.status === 'completed' && !isJobViewed(job.id) 
+                            ? "text-medical-blue" 
+                            : "text-gray-500"
+                        )}
+                      >
                         <Eye className="w-4 h-4" />
                       </Button>
                       {(job.status === 'queued' || job.status === 'processing') && (

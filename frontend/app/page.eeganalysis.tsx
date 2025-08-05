@@ -10,12 +10,34 @@ import { EEGWaveformChart } from "@/components/charts/eeg-waveform-chart"
 import { AnalysisTrendsChart } from "@/components/dashboard/analysis-trends-chart"
 import { EnhancedDropzone } from "@/components/upload/enhanced-dropzone"
 import QueuePage from "./queue/page"
-import { 
-  mockEEGData, 
-  mockTrendsData, 
-  mockChannels,
-  mockQueueData 
-} from "./eegAnalysisMockData"
+// Default data structures
+const defaultEEGData = [
+  {
+    time: new Date().toISOString(),
+    channel_1: 0,
+    channel_2: 0,
+    channel_3: 0,
+    channel_4: 0,
+    channel_5: 0,
+    channel_6: 0,
+    channel_7: 0,
+    channel_8: 0
+  }
+]
+
+const defaultTrendsData = [
+  {
+    date: new Date().toISOString().split('T')[0],
+    completed: 0,
+    failed: 0,
+    processing: 0
+  }
+]
+
+const defaultChannels = [
+  "channel_1", "channel_2", "channel_3", "channel_4",
+  "channel_5", "channel_6", "channel_7", "channel_8"
+]
 import { Activity, Upload, BarChart3, Clock, AlertTriangle } from 'lucide-react'
 
 export default function EEGAnalysisPage() {
@@ -78,7 +100,7 @@ export default function EEGAnalysisPage() {
             <TabsContent value="dashboard" className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Analysis Trends Chart */}
-                <AnalysisTrendsChart data={mockTrendsData} />
+                <AnalysisTrendsChart data={defaultTrendsData} />
                 
                 {/* Quick Stats */}
                 <Card>
@@ -118,8 +140,8 @@ export default function EEGAnalysisPage() {
             {/* EEG Visualization Tab */}
             <TabsContent value="visualization" className="space-y-6">
               <EEGWaveformChart 
-                data={mockEEGData}
-                channels={mockChannels}
+                data={defaultEEGData}
+                channels={defaultChannels}
                 title="Real-time EEG Monitoring"
                 height={500}
               />
@@ -127,14 +149,14 @@ export default function EEGAnalysisPage() {
               {/* Additional Charts Row */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <EEGWaveformChart 
-                  data={mockEEGData.slice(0, 10)}
-                  channels={mockChannels.slice(0, 4)}
+                  data={defaultEEGData}
+                  channels={defaultChannels.slice(0, 4)}
                   title="Frontal Lobe Activity"
                   height={300}
                 />
                 <EEGWaveformChart 
-                  data={mockEEGData.slice(0, 10)}
-                  channels={mockChannels.slice(4, 8)}
+                  data={defaultEEGData}
+                  channels={defaultChannels.slice(4, 8)}
                   title="Temporal Lobe Activity"
                   height={300}
                 />

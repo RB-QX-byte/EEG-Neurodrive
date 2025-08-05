@@ -100,7 +100,7 @@ export default function ResultsPage() {
     }
   }
 
-  // Generate mock data based on real result data for visualization
+  // Generate visualization data based on real result data
   const generateVisualizationData = () => {
     if (!result?.result) return { eegData: [], disorderProbabilities: [], temporalData: [] }
 

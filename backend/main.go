@@ -253,6 +253,10 @@ func main() {
 		protected.GET("/dashboard", getDashboardHandler)
 		protected.GET("/stats", getStatsHandler)
 
+		// Settings
+		protected.GET("/settings", getSettingsHandler)
+		protected.PUT("/settings", updateSettingsHandler)
+
 		// Reports
 		protected.POST("/reports/generate", generateReportHandler)
 		protected.GET("/reports", getReportsHandler)
@@ -1509,6 +1513,106 @@ func importEEGFromCSV(filePath, subjectID string) {
 	}
 
 	log.Printf("Completed EEG data import for subject %s", subjectID)
+}
+
+// --- Settings Handlers ---
+
+func getSettingsHandler(c *gin.Context) {
+	userID := getUserIDFromContext(c)
+
+	// For now, return mock settings data
+	// In a real implementation, you would fetch user-specific settings from the database
+	settings := gin.H{
+		"general": gin.H{
+			"theme":           "system",
+			"language":        "english",
+			"timezone":        "UTC",
+			"refresh_interval": "30",
+			"auto_save":       true,
+		},
+		"analysis": gin.H{
+			"default_model":        "cnn_lstm",
+			"confidence_threshold": "medium",
+			"default_priority":     "normal",
+			"auto_processing":      false,
+			"channel_configuration": gin.H{
+				"enabled_channels": []int{1, 2, 3, 4, 5, 6, 7, 8},
+				"sampling_rate":    256,
+				"filter_settings": gin.H{
+					"low_pass":  50,
+					"high_pass": 0.5,
+					"notch":     60,
+				},
+			},
+		},
+		"notifications": gin.H{
+			"email": gin.H{
+				"enabled":   true,
+				"frequency": "immediate",
+				"types":     []string{"analysis_complete", "errors"},
+			},
+			"in_app": gin.H{
+				"enabled":   true,
+				"frequency": "immediate",
+				"types":     []string{"analysis_complete", "queue_updates", "errors"},
+			},
+		},
+		"security": gin.H{
+			"session_timeout":    "24h",
+			"two_factor_enabled": false,
+			"password_policy": gin.H{
+				"min_length":      8,
+				"require_special": true,
+				"require_numbers": true,
+				"require_upper":   true,
+			},
+		},
+		"data_management": gin.H{
+			"retention":           "1_year",
+			"auto_cleanup":        true,
+			"backup_enabled":      false,
+			"export_format":       "csv",
+			"compression_enabled": true,
+		},
+		"user": gin.H{
+			"id":           userID,
+			"username":     "current_user", // Would be fetched from database
+			"email":        "user@example.com",
+			"full_name":    "Current User",
+			"role":         "user",
+			"department":   "Neurology",
+			"phone":        "",
+			"organization": "Medical Center",
+		},
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"settings": settings,
+		"message":  "Settings retrieved successfully",
+	})
+}
+
+func updateSettingsHandler(c *gin.Context) {
+	userID := getUserIDFromContext(c)
+
+	var req map[string]interface{}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	// In a real implementation, you would:
+	// 1. Validate the settings data
+	// 2. Update the user's settings in the database
+	// 3. Return the updated settings
+
+	log.Printf("User %d updating settings: %+v", userID, req)
+
+	// For now, just return success
+	c.JSON(http.StatusOK, gin.H{
+		"message":  "Settings updated successfully",
+		"settings": req,
+	})
 }
 
 // --- Middleware ---

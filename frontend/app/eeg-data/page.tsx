@@ -116,8 +116,8 @@ export default function EEGDataPage() {
       setPredictSuccess(false)
       setError("")
 
-      // Use a mock file path for the subject data - in real implementation,
-      // you'd either export the data to a file or modify the backend to handle subject IDs directly
+      // Generate file path for the subject data
+      // In production, this would be the actual file path from the database
       const filePath = `uploads/subject_${subjectId}_data.csv`
       
       const response = await analysisAPI.predict(filePath, subjectId)

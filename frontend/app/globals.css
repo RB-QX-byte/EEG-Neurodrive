@@ -54,6 +54,25 @@
     --status-error: 0 84% 60%;
     --status-info: 214 100% 50%;
     --status-processing: 262 83% 58%;
+    
+    /* Settings page specific colors */
+    --settings-sidebar-bg: 248 250 252;
+    --settings-content-bg: 255 255 255;
+    --settings-border: 226 232 240;
+    --settings-hover: 241 245 249;
+    --settings-active: 214 100% 96%;
+    
+    /* Form element colors */
+    --form-label: 71 85 105;
+    --form-description: 100 116 139;
+    --form-error: 239 68 68;
+    --form-success: 34 197 94;
+    
+    /* Status indicators */
+    --status-healthy: 34 197 94;
+    --status-warning: 245 158 11;
+    --status-error: 239 68 68;
+    --status-info: 59 130 246;
   }
 
   .dark {
@@ -81,6 +100,50 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
+    /* Enhanced medical theme colors for dark mode */
+    --medical-blue: 214 100% 60%;
+    --medical-blue-light: 214 100% 15%;
+    --medical-green: 142 76% 46%;
+    --medical-red: 0 84% 70%;
+    --medical-orange: 25 95% 63%;
+    --medical-purple: 262 83% 68%;
+    
+    /* Chart colors for EEG data in dark mode */
+    --eeg-channel-1: 214 100% 60%;
+    --eeg-channel-2: 0 84% 70%;
+    --eeg-channel-3: 142 76% 46%;
+    --eeg-channel-4: 25 95% 63%;
+    --eeg-channel-5: 262 83% 68%;
+    --eeg-channel-6: 310 83% 68%;
+    --eeg-channel-7: 173 58% 49%;
+    --eeg-channel-8: 43 74% 76%;
+    
+    /* Status colors for dark mode */
+    --status-success: 142 76% 46%;
+    --status-warning: 25 95% 63%;
+    --status-error: 0 84% 70%;
+    --status-info: 214 100% 60%;
+    --status-processing: 262 83% 68%;
+    
+    /* Settings page dark mode colors */
+    --settings-sidebar-bg: 15 23 42;
+    --settings-content-bg: 30 41 59;
+    --settings-border: 51 65 85;
+    --settings-hover: 51 65 85;
+    --settings-active: 214 100% 15%;
+    
+    /* Form element colors for dark mode */
+    --form-label: 226 232 240;
+    --form-description: 148 163 184;
+    --form-error: 248 113 113;
+    --form-success: 74 222 128;
+    
+    /* Status indicators for dark mode */
+    --status-healthy: 74 222 128;
+    --status-warning: 251 191 36;
+    --status-error: 248 113 113;
+    --status-info: 96 165 250;
   }
 }
 
@@ -123,5 +186,46 @@
   }
   .text-status-processing {
     color: hsl(var(--status-processing));
+  }
+  .settings-sidebar {
+    background-color: hsl(var(--settings-sidebar-bg));
+    border-color: hsl(var(--settings-border));
+  }
+  .settings-content {
+    background-color: hsl(var(--settings-content-bg));
+  }
+  .settings-nav-item {
+    color: hsl(var(--form-label));
+  }
+  .settings-nav-item:hover {
+    background-color: hsl(var(--settings-hover));
+  }
+  .settings-nav-item[data-active="true"] {
+    background-color: hsl(var(--settings-active));
+    color: hsl(var(--medical-blue));
+  }
+  .form-label {
+    color: hsl(var(--form-label));
+  }
+  .form-description {
+    color: hsl(var(--form-description));
+  }
+  .form-error {
+    color: hsl(var(--form-error));
+  }
+  .form-success {
+    color: hsl(var(--form-success));
+  }
+  .status-healthy {
+    color: hsl(var(--status-healthy));
+  }
+  .status-warning {
+    color: hsl(var(--status-warning));
+  }
+  .status-error {
+    color: hsl(var(--status-error));
+  }
+  .status-info {
+    color: hsl(var(--status-info));
   }
 }

@@ -8,6 +8,7 @@ import { Inter } from "next/font/google"
 import { Sidebar } from "@/components/layout/sidebar"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider, useAuth } from "@/lib/auth-context"
+import { QueueProvider } from "@/lib/queue-context"
 import { ErrorBoundary } from "@/components/error-boundary"
 import "./globals.css"
 
@@ -73,7 +74,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <AuthProvider>
-            <AppLayout>{children}</AppLayout>
+            <QueueProvider>
+              <AppLayout>{children}</AppLayout>
+            </QueueProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

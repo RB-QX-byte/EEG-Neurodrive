@@ -411,6 +411,22 @@ export const eegDataAPI = {
   },
 };
 
+// Settings API
+export const settingsAPI = {
+  async getSettings(): Promise<{ settings: Record<string, any>; message: string }> {
+    const response = await apiRequest('/settings');
+    return response;
+  },
+
+  async updateSettings(settings: Record<string, any>): Promise<{ message: string; settings: Record<string, any> }> {
+    const response = await apiRequest('/settings', {
+      method: 'PUT',
+      body: JSON.stringify(settings),
+    });
+    return response;
+  },
+};
+
 export default {
   auth: authAPI,
   dashboard: dashboardAPI,
@@ -419,4 +435,5 @@ export default {
   results: resultsAPI,
   reports: reportsAPI,
   eegData: eegDataAPI,
+  settings: settingsAPI,
 }; 
