@@ -27,6 +27,8 @@ interface QueueProviderProps {
 export function QueueProvider({ children }: QueueProviderProps) {
   const [unviewedCount, setUnviewedCount] = useState(0);
   const [viewedJobs, setViewedJobs] = useState<Set<number>>(new Set());
+  const [errorCount, setErrorCount] = useState(0);
+  const [isPolling, setIsPolling] = useState(true);
 
   // Load viewed jobs from localStorage on mount
   useEffect(() => {
@@ -47,6 +49,12 @@ export function QueueProvider({ children }: QueueProviderProps) {
   }, [viewedJobs]);
 
   const refreshUnviewedCount = async () => {
+    // Stop polling if too many consecutive errors
+    if (!isPolling || errorCount >= 5) {
+      console.warn('Queue polling stopped due to repeated errors');
+      return;
+    }
+
     try {
       // Get all completed jobs
       const response = await analysisAPI.getQueue('completed');
@@ -55,9 +63,40 @@ export function QueueProvider({ children }: QueueProviderProps) {
       // Count unviewed completed jobs
       const unviewed = completedJobs.filter(job => !viewedJobs.has(job.id));
       setUnviewedCount(unviewed.length);
-    } catch (error) {
+      
+      // Reset error count on success
+      setErrorCount(0);
+    } catch (error: any) {
       console.error('Error fetching queue data:', error);
-      // Don't update count on error to avoid showing incorrect data
+      
+      // Increment error count
+      setErrorCount(prev => prev + 1);
+      
+      // If unauthorized or rate limited, stop polling completely
+      if (error.status === 401 || error.message?.includes('Unauthorized')) {
+        console.warn('Authentication failed, stopping queue polling');
+        setIsPolling(false);
+        setUnviewedCount(0);
+        return;
+      }
+      
+      if (error.status === 429 || error.message?.includes('busy')) {
+        console.warn('Rate limited, temporarily stopping queue polling');
+        setIsPolling(false);
+        // Re-enable polling after 30 seconds
+        setTimeout(() => {
+          console.log('Re-enabling queue polling after rate limit');
+          setIsPolling(true);
+          setErrorCount(0);
+        }, 30000);
+        return;
+      }
+      
+      // Stop polling after 5 consecutive errors
+      if (errorCount >= 4) {
+        console.warn('Too many queue polling errors, stopping');
+        setIsPolling(false);
+      }
     }
   };
 
@@ -78,12 +117,22 @@ export function QueueProvider({ children }: QueueProviderProps) {
 
   // Refresh count on mount and periodically
   useEffect(() => {
-    refreshUnviewedCount();
+    if (isPolling) {
+      refreshUnviewedCount();
+    }
     
-    // Refresh every 30 seconds
-    const interval = setInterval(refreshUnviewedCount, 30000);
+    // Only set up interval if polling is enabled
+    if (!isPolling) return;
+    
+    // Refresh every 60 seconds (increased from 30 to reduce load)
+    const interval = setInterval(() => {
+      if (isPolling) {
+        refreshUnviewedCount();
+      }
+    }, 60000);
+    
     return () => clearInterval(interval);
-  }, [viewedJobs]); // Re-run when viewedJobs changes
+  }, [viewedJobs, isPolling, errorCount]); // Re-run when polling state changes
 
   const value: QueueContextType = {
     unviewedCount,

@@ -25,14 +25,24 @@ export default function QueuePage() {
   const [priorityFilter, setPriorityFilter] = useState("all")
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
+  const [shouldPoll, setShouldPoll] = useState(true)
   const { markAsViewed, isJobViewed, refreshUnviewedCount } = useQueue()
 
   useEffect(() => {
     fetchQueueData()
-    // Refresh every 10 seconds for real-time updates
-    const interval = setInterval(fetchQueueData, 10000)
+    
+    // Only poll if shouldPoll is true and we're not in an error state
+    if (!shouldPoll) return
+    
+    // Refresh every 60 seconds (much less frequent to prevent DoS)
+    const interval = setInterval(() => {
+      if (shouldPoll && !error.includes('Unauthorized') && !error.includes('busy')) {
+        fetchQueueData()
+      }
+    }, 60000)
+    
     return () => clearInterval(interval)
-  }, [])
+  }, [shouldPoll, error])
 
   const fetchQueueData = async () => {
     try {
@@ -46,8 +56,25 @@ export default function QueuePage() {
       // Refresh unviewed count after fetching queue data
       await refreshUnviewedCount()
     } catch (err: any) {
-      setError(err.message || "Failed to load queue data")
+      const errorMessage = err.message || "Failed to load queue data"
+      setError(errorMessage)
       console.error("Queue error:", err)
+      
+      // If unauthorized or rate limited, stop polling to prevent DoS attacks
+      if (err.status === 401 || errorMessage.includes('Unauthorized')) {
+        console.warn('Authentication failed, stopping queue polling')
+        setShouldPoll(false)
+      }
+      
+      if (err.status === 429 || errorMessage.includes('busy')) {
+        console.warn('Rate limited, temporarily stopping queue polling')
+        setShouldPoll(false)
+        // Re-enable after 60 seconds
+        setTimeout(() => {
+          console.log('Re-enabling queue polling after rate limit')
+          setShouldPoll(true)
+        }, 60000)
+      }
     } finally {
       setIsLoading(false)
     }

@@ -22,6 +22,7 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
   const [predictingJobIds, setPredictingJobIds] = useState<Set<number>>(new Set())
+  const [shouldPoll, setShouldPoll] = useState(true)
 
   const fetchDashboardData = async () => {
     try {
@@ -40,8 +41,25 @@ export default function Dashboard() {
       setDashboardData(data)
       setError("") // Clear any previous errors on successful load
     } catch (err: any) {
-      setError(err.message || "Failed to load dashboard data")
+      const errorMessage = err.message || "Failed to load dashboard data"
+      setError(errorMessage)
       console.error("Dashboard error:", err)
+      
+      // If unauthorized or rate limited, stop polling to prevent DoS attacks
+      if (err.status === 401 || errorMessage.includes('Unauthorized')) {
+        console.warn('Authentication failed, stopping dashboard polling')
+        setShouldPoll(false)
+      }
+      
+      if (err.status === 429 || errorMessage.includes('busy')) {
+        console.warn('Rate limited, temporarily stopping dashboard polling')
+        setShouldPoll(false)
+        // Re-enable after 120 seconds
+        setTimeout(() => {
+          console.log('Re-enabling dashboard polling after rate limit')
+          setShouldPoll(true)
+        }, 120000)
+      }
     } finally {
       setIsLoading(false)
     }
@@ -54,10 +72,18 @@ export default function Dashboard() {
   useEffect(() => {
     fetchDashboardData()
     
-    // Refresh data every 30 seconds
-    const interval = setInterval(fetchDashboardData, 30000)
+    // Only poll if shouldPoll is true and we're not in an error state
+    if (!shouldPoll) return
+    
+    // Refresh data every 120 seconds (much less frequent to prevent DoS)
+    const interval = setInterval(() => {
+      if (shouldPoll && !error.includes('Unauthorized') && !error.includes('busy')) {
+        fetchDashboardData()
+      }
+    }, 120000)
+    
     return () => clearInterval(interval)
-  }, [])
+  }, [shouldPoll, error])
 
   const handlePredict = async (job: AnalysisJob) => {
     if (!job.file_path) {

@@ -137,7 +137,10 @@ export const clearAuthToken = () => {
 };
 
 // API request helper
-const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
+// Exponential backoff utility
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+const apiRequest = async (endpoint: string, options: RequestInit = {}, retryCount = 0) => {
   const token = getAuthToken();
   const url = `${API_BASE_URL}${endpoint}`;
 
@@ -161,8 +164,23 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
       window.location.href = '/login';
       throw new Error('Unauthorized');
     }
+    
+    // Handle rate limiting with exponential backoff
+    if (response.status === 429 && retryCount < 3) {
+      const backoffDelay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
+      console.warn(`Rate limited. Retrying in ${backoffDelay}ms (attempt ${retryCount + 1}/3)`);
+      await delay(backoffDelay);
+      return apiRequest(endpoint, options, retryCount + 1);
+    }
+    
+    if (response.status === 429) {
+      throw new Error('Server is busy. Please try again later.');
+    }
+    
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `HTTP ${response.status}`);
+    const error = new Error(errorData.error || `HTTP ${response.status}`) as any;
+    error.status = response.status;
+    throw error;
   }
 
   return response.json();

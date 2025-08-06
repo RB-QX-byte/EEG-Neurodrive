@@ -1,24 +1,247 @@
 version: '3.8'
 
+networks:
+  eeg-network:
+    driver: bridge
+
 services:
+  # Database - TimescaleDB for time-series EEG data
   timescaledb:
-    image: timescale/timescaledb:latest-pg14
+    image: timescale/timescaledb:latest-pg15
     container_name: eeg_timescaledb
+    restart: unless-stopped
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
       - POSTGRES_DB=eegdb
+      - POSTGRES_MULTIPLE_DATABASES=eegdb,mlflow
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./setup_timescaledb.sql:/docker-entrypoint-initdb.d/setup_timescaledb.sql
+      - ./setup_timescaledb.sql:/docker-entrypoint-initdb.d/01-setup_timescaledb.sql
+      - ./setup_mlflow_db.sql:/docker-entrypoint-initdb.d/02-setup_mlflow_db.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d eegdb"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - eeg-network
+
+  # Redis for caching and session storage
+  redis:
+    image: redis:7-alpine
+    container_name: eeg_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis123}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - eeg-network
+
+  # MLflow Model Registry and Experiment Tracking
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.8.0
+    container_name: eeg_mlflow
+    restart: unless-stopped
+    environment:
+      - BACKEND_STORE_URI=postgresql://postgres:${DB_PASSWORD:-postgres}@timescaledb:5432/mlflow
+      - DEFAULT_ARTIFACT_ROOT=s3://mlflow-artifacts
+      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
+      - AWS_ACCESS_KEY_ID=${MINIO_ACCESS_KEY:-minioadmin}
+      - AWS_SECRET_ACCESS_KEY=${MINIO_SECRET_KEY:-minioadmin}
+    ports:
+      - "5000:5000"
+    command: >
+      mlflow server
+      --backend-store-uri postgresql://postgres:${DB_PASSWORD:-postgres}@timescaledb:5432/mlflow
+      --default-artifact-root s3://mlflow-artifacts
+      --host 0.0.0.0
+      --port 5000
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    networks:
+      - eeg-network
+
+  # MinIO for artifact storage
+  minio:
+    image: minio/minio:latest
+    container_name: eeg_minio
+    restart: unless-stopped
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY:-minioadmin}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - eeg-network
+
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: eeg_prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/rules:/etc/prometheus/rules:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    networks:
+      - eeg-network
+
+  # Grafana for visualization and monitoring dashboards
+  grafana:
+    image: grafana/grafana:10.1.0
+    container_name: eeg_grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+    networks:
+      - eeg-network
+
+  # EEG Backend API
+  eeg-backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: eeg_backend
+    restart: unless-stopped
+    environment:
+      - DB_HOST=timescaledb
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_NAME=eegdb
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-redis123}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - PYTHON_PATH=/usr/bin/python3
+      - GIN_MODE=release
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./uploads:/app/uploads
+      - ../Model:/app/Model:ro
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - eeg-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ML Model Serving Service
+  model-server:
+    build:
+      context: ../Model
+      dockerfile: Dockerfile.serving
+    container_name: eeg_model_server
+    restart: unless-stopped
+    environment:
+      - MODEL_PATH=/app/models
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - "8001:8000"
+    volumes:
+      - ../Model:/app:ro
+      - model_cache:/app/cache
+    depends_on:
+      - redis
+      - mlflow
+    networks:
+      - eeg-network
+
+  # Node Exporter for system metrics
+  node-exporter:
+    image: prom/node-exporter:v1.6.0
+    container_name: eeg_node_exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - eeg-network
+
+  # cAdvisor for container metrics
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.0
+    container_name: eeg_cadvisor
+    restart: unless-stopped
+    ports:
+      - "8082:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    privileged: true
+    networks:
+      - eeg-network
 
 volumes:
   postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  model_cache:
     driver: local

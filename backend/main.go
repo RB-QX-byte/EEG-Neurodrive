@@ -190,7 +190,8 @@ var jwtKey []byte
 func init() {
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
-		log.Fatal("JWT_SECRET environment variable not set")
+		secret = "development-secret-key-not-for-production"
+		log.Println("⚠️  Warning: Using default JWT secret. Set JWT_SECRET environment variable for production!")
 	}
 	jwtKey = []byte(secret)
 }
@@ -202,77 +203,31 @@ func main() {
 	// Initialize Database
 	initDB()
 
-	// Setup Router
-	r := gin.Default()
-
-	// Enable CORS for frontend
-	r.Use(func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
-			return
-		}
-
-		c.Next()
-	})
-
-	// Public routes
-	public := r.Group("/api")
-	{
-		public.POST("/register", registerHandler)
-		public.POST("/login", loginHandler)
-		public.GET("/health", healthHandler)
+	// Initialize Security System
+	log.Println("🔒 Initializing security system...")
+	if err := InitializeSecurity(DB); err != nil {
+		log.Printf("⚠️ Security initialization warning: %v", err)
+	} else {
+		log.Println("✅ Security system initialized successfully")
 	}
 
-	// Protected routes
-	protected := r.Group("/api")
-	protected.Use(authMiddleware())
-	{
-		// File upload and management
-		protected.POST("/upload", uploadHandler)
-		protected.GET("/files", listFilesHandler)
-		protected.DELETE("/files/:id", deleteFileHandler)
-
-		// Analysis operations
-		protected.POST("/classify", classifyHandler)
-		protected.POST("/predict", predictHandler)
-		protected.GET("/queue", getQueueHandler)
-		protected.PUT("/queue/:id/priority", updatePriorityHandler)
-		protected.PUT("/queue/:id/status", updateStatusHandler)
-		protected.DELETE("/queue/:id", cancelJobHandler)
-
-		// Results
-		protected.GET("/results", getResultsHandler)
-		protected.GET("/results/:id", getResultByIDHandler)
-		protected.DELETE("/results/:id", deleteResultHandler)
-
-		// Dashboard
-		protected.GET("/dashboard", getDashboardHandler)
-		protected.GET("/stats", getStatsHandler)
-
-		// Settings
-		protected.GET("/settings", getSettingsHandler)
-		protected.PUT("/settings", updateSettingsHandler)
-
-		// Reports
-		protected.POST("/reports/generate", generateReportHandler)
-		protected.GET("/reports", getReportsHandler)
-		protected.GET("/reports/:id", getReportByIDHandler)
-		protected.DELETE("/reports/:id", deleteReportHandler)
-		protected.GET("/reports/:id/download", downloadReportHandler)
-
-		// EEG data management
-		protected.GET("/eeg/subjects", getEEGSubjectsHandler)
-		protected.POST("/eeg/import", importEEGDataHandler)
-		protected.GET("/eeg/data/:subject_id", getEEGDataHandler)
-		protected.DELETE("/eeg/data/:subject_id", deleteEEGDataHandler)
+	// Initialize Cache System
+	log.Println("⚡ Initializing cache system...")
+	if err := InitializeCache(); err != nil {
+		log.Printf("⚠️ Cache initialization warning: %v", err)
+	} else {
+		log.Println("✅ Cache system initialized successfully")
 	}
 
-	log.Println("Server starting on :8080")
-	r.Run(":8080")
+	// Create and start server with WebSocket support
+	server := NewServer(DB)
+	
+	log.Println("✅ Real-time WebSocket streaming enabled at /ws/eeg-stream")
+	log.Println("📊 Starting EEG-Neurodrive server with enhanced security and performance...")
+	
+	if err := server.Run(":8080"); err != nil {
+		log.Fatal("Failed to start server:", err)
+	}
 }
 
 // --- Database ---
