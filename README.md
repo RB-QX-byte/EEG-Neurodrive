@@ -111,6 +111,9 @@ go mod download
 cd ../frontend
 npm install
 
+# Setup frontend environment (creates .env.local automatically)
+npm run setup
+
 # Set up Python environment for ML models
 cd ../Model
 python -m venv venv
